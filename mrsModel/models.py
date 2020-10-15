@@ -1,5 +1,5 @@
 # UNITED LIFTS MRS BASE MODEL
-
+from auditlog.registry import auditlog
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -558,3 +558,6 @@ class WorkorderPosition(models.Model):
     class Meta:
         managed = True
         db_table = 'workorders_positions'
+
+
+auditlog.register(Month)
