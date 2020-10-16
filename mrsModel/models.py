@@ -12,6 +12,15 @@ class ServiceTarget(models.Model):
         managed = True
         db_table = 'services_targets'
 
+class ServiceArea(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+    description = models.CharField(db_column='description', max_length=250)
+
+    class Meta:
+        managed = True
+        db_table = 'services_areas'
+
 class Month(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
@@ -148,13 +157,34 @@ class Supplier(models.Model):
     description = models.CharField(max_length=255, blank=True, null=True)
     contact = models.OneToOneField(Contact, on_delete=models.CASCADE)
 
+    class Meta:
+        managed = True
+        db_table = 'suppliers'
+
 class Part(models.Model):
     id = models.AutoField(primary_key=True)
     part_number = models.CharField(max_length=50)
     name = models.CharField(max_length=50)
+    photo = models.CharField(max_length=500)
+    brand = models.ForeignKey(Brand, on_delete=models.DO_NOTHING, db_column='brandId', blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
-    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, db_column='supplierId', blank=True, null=True)
+    supplier = models.ForeignKey(Supplier, on_delete=models.DO_NOTHING, db_column='supplierId', blank=True, null=True)
 
+    class Meta:
+        managed = True
+        db_table = 'parts'
+
+class Inventory(models.Model):
+    id = models.AutoField(primary_key=True)
+    part = models.ForeignKey(Part, on_delete=models.DO_NOTHING, db_column='partId', blank=True, null=True)
+    reorder_details = models.CharField(max_length=255, blank=True, null=True)
+    quantity = models.IntegerField(db_column='quantity')
+    warning_quantity = models.IntegerField(db_column='warning_quantity')
+    shelf_number = models.CharField(max_length=50)
+
+    class Meta:
+        managed = True
+        db_table = 'inventory'
 
 class Console(models.Model):
     id = models.AutoField(primary_key=True)
@@ -252,10 +282,10 @@ class Job(models.Model):
     id = models.AutoField(primary_key=True)
     number = models.IntegerField()
     name = models.CharField(max_length=50)
-    contact = models.OneToOneField(Contact, on_delete=models.CASCADE)
+    contact = models.OneToOneField(Contact, on_delete=models.DO_NOTHING)
     project_id = models.IntegerField(db_column='projectId', unique=True)
     contract = models.OneToOneField(Contract, on_delete=models.CASCADE)
-    agent = models.OneToOneField(Agent, on_delete=models.CASCADE)
+    agent = models.OneToOneField(Agent, on_delete=models.DO_NOTHING)
     round = models.ForeignKey(Round, on_delete=models.DO_NOTHING, db_column='roundId')  
     service_type_id = models.IntegerField(db_column='serviceTypeId', unique=True)
     floors = models.CharField(max_length=255, blank=True, null=True)
@@ -264,8 +294,11 @@ class Job(models.Model):
     key_access_details = models.CharField(db_column='keyAccessDetails', max_length=255, blank=True, null=True)
     notes = models.CharField(max_length=4000, blank=True, null=True)
     position = models.TextField(blank=True, null=True)  # This field type is a guess.
+    address = models.CharField(db_column='address', max_length=100, blank=True, null=True)
+    suburb = models.CharField(db_column='suburb', max_length=50, blank=True, null=True)
+    lifts = models.IntegerField()
 
-    class Meta:
+class Meta:
         managed = True
         db_table = 'jobs'
 
@@ -297,6 +330,7 @@ class Task(models.Model):
     description = models.CharField(max_length=255, blank=True, null=True)
     default_month = models.ForeignKey(Month, on_delete=models.DO_NOTHING, db_column='defaultMonth')
     service_target = models.ForeignKey(ServiceTarget, on_delete=models.DO_NOTHING, db_column='serviceTargetId')
+    service_area = models.ForeignKey(ServiceArea, on_delete=models.DO_NOTHING, db_column='serviceAreaId')
 
     class Meta:
         managed = True
@@ -486,7 +520,7 @@ class Callout(models.Model):
     correction = models.ForeignKey(Correction, models.DO_NOTHING, db_column='correctionId')
     attributable_id = models.IntegerField(db_column='attributableId', blank=True, null=True)
     tech_description = models.CharField(db_column='techDescription', max_length=255, blank=True, null=True)
-    workorder = models.ForeignKey(Workorder, on_delete=models.DO_NOTHING, db_column='workorderId', blank=True, null=True)
+    workorder = models.OneToOneField(Workorder, on_delete=models.DO_NOTHING, db_column='workorderId', blank=True, null=True)
     docket_number = models.CharField(db_column='docketNumber', max_length=255, blank=True, null=True)
     callout_time = models.DateTimeField(db_column='calloutTime', blank=True, null=True)
     time_arrival = models.DateTimeField(db_column='timeArrival', blank=True, null=True)

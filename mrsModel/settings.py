@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'inspectdb_refactor',
     'rest_framework',
     'auditlog',
     'mrsModel',
@@ -84,11 +83,11 @@ DATABASES = {
         #'NAME': 'uls.tracker.v2', # example - blog_data
         #'USER': 'dev',
         #'PASSWORD': 'DBPassULS$2020',
-        #'HOST': '10.42.0.149',
+        #'HOST': '10.42.0.246',
         #'PORT': '3306',
 
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test', # example - blog_data
+        'NAME': 'test',
         'USER': 'root',
         'HOST': 'localhost',
         'PORT': '3306',
@@ -115,11 +114,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
 }
 
 
