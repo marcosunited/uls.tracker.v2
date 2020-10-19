@@ -3,6 +3,7 @@ from auditlog.registry import auditlog
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class ServiceTarget(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
@@ -11,6 +12,8 @@ class ServiceTarget(models.Model):
     class Meta:
         managed = True
         db_table = 'services_targets'
+        app_label = 'mrs'
+
 
 class ServiceArea(models.Model):
     id = models.AutoField(primary_key=True)
@@ -20,6 +23,8 @@ class ServiceArea(models.Model):
     class Meta:
         managed = True
         db_table = 'services_areas'
+        app_label = 'mrs'
+
 
 class Month(models.Model):
     id = models.AutoField(primary_key=True)
@@ -28,6 +33,8 @@ class Month(models.Model):
     class Meta:
         managed = True
         db_table = 'months'
+        app_label = 'mrs'
+
 
 class Country(models.Model):
     id = models.AutoField(primary_key=True)
@@ -38,6 +45,7 @@ class Country(models.Model):
     class Meta:
         managed = True
         db_table = 'countries'
+
 
 class Project(models.Model):
     id = models.AutoField(primary_key=True)
@@ -50,6 +58,7 @@ class Project(models.Model):
         managed = True
         db_table = 'projects'
 
+
 class ProcessType(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
@@ -60,6 +69,7 @@ class ProcessType(models.Model):
     class Meta:
         managed = True
         db_table = 'process_types'
+
 
 class ProcessTypeStatus(models.Model):
     id = models.AutoField(primary_key=True)
@@ -74,6 +84,7 @@ class ProcessTypeStatus(models.Model):
         managed = True
         db_table = 'process_types_status'
 
+
 class Title(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, blank=True, null=True)
@@ -81,6 +92,7 @@ class Title(models.Model):
     class Meta:
         managed = True
         db_table = 'titles'
+
 
 class Profile(models.Model):
     id = models.AutoField(primary_key=True)
@@ -100,10 +112,10 @@ class Profile(models.Model):
     projects = models.ManyToManyField(Project)
     is_active = models.BooleanField(default=True, db_column='isActive')
 
-
     class Meta:
         managed = True
         db_table = 'profile'
+
 
 class Contact(models.Model):
     id = models.AutoField(primary_key=True)
@@ -120,10 +132,11 @@ class Contact(models.Model):
         managed = True
         db_table = 'contacts'
 
+
 class Attachment(models.Model):
     id = models.AutoField(primary_key=True)
-    conceptid = models.IntegerField(db_column='conceptId', unique=True)  
-    valueconcept = models.IntegerField(db_column='valueConcept')  
+    conceptid = models.IntegerField(db_column='conceptId', unique=True)
+    valueconcept = models.IntegerField(db_column='valueConcept')
     name = models.CharField(max_length=255)
     path = models.CharField(max_length=512)
 
@@ -151,6 +164,7 @@ class Technician(models.Model):
         managed = True
         db_table = 'technicians'
 
+
 class Supplier(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
@@ -160,6 +174,7 @@ class Supplier(models.Model):
     class Meta:
         managed = True
         db_table = 'suppliers'
+
 
 class Part(models.Model):
     id = models.AutoField(primary_key=True)
@@ -174,6 +189,7 @@ class Part(models.Model):
         managed = True
         db_table = 'parts'
 
+
 class Inventory(models.Model):
     id = models.AutoField(primary_key=True)
     part = models.ForeignKey(Part, on_delete=models.DO_NOTHING, db_column='partId', blank=True, null=True)
@@ -185,6 +201,7 @@ class Inventory(models.Model):
     class Meta:
         managed = True
         db_table = 'inventory'
+
 
 class Console(models.Model):
     id = models.AutoField(primary_key=True)
@@ -204,6 +221,7 @@ class ContractFrequency(models.Model):
         managed = True
         db_table = 'contracts_frequencies'
 
+
 class Contract(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50, blank=True, null=True)
@@ -222,6 +240,7 @@ class Contract(models.Model):
     class Meta:
         managed = True
         db_table = 'contracts'
+
 
 class Correction(models.Model):
     id = models.AutoField(primary_key=True)
@@ -255,6 +274,7 @@ class JhaItem(models.Model):
         managed = True
         db_table = 'jha_items'
 
+
 class Round(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
@@ -286,7 +306,7 @@ class Job(models.Model):
     project_id = models.IntegerField(db_column='projectId', unique=True)
     contract = models.OneToOneField(Contract, on_delete=models.CASCADE)
     agent = models.OneToOneField(Agent, on_delete=models.DO_NOTHING)
-    round = models.ForeignKey(Round, on_delete=models.DO_NOTHING, db_column='roundId')  
+    round = models.ForeignKey(Round, on_delete=models.DO_NOTHING, db_column='roundId')
     service_type_id = models.IntegerField(db_column='serviceTypeId', unique=True)
     floors = models.CharField(max_length=255, blank=True, null=True)
     postcode = models.CharField(db_column='postCode', max_length=12, blank=True, null=True)
@@ -298,9 +318,10 @@ class Job(models.Model):
     suburb = models.CharField(db_column='suburb', max_length=50, blank=True, null=True)
     lifts = models.IntegerField()
 
+
 class Meta:
-        managed = True
-        db_table = 'jobs'
+    managed = True
+    db_table = 'jobs'
 
 
 class Lift(models.Model):
@@ -380,7 +401,7 @@ class Settings(models.Model):
         managed = True
         db_table = 'settings'
 
-
+"""
 class UsersHistoryLogins(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, db_column='userId')
@@ -395,15 +416,17 @@ class UsersHistoryLogins(models.Model):
     class Meta:
         managed = True
         db_table = 'users_history_logins'
-
+"""
 
 class Workflow(models.Model):
     id = models.AutoField(primary_key=True)
     process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
     name = models.CharField(max_length=50, blank=True, null=True)
     description = models.CharField(max_length=255)
-    status = models.ForeignKey(ProcessTypeStatus,related_name='wo_current_status', on_delete=models.DO_NOTHING, db_column='statusId')
-    next_status = models.ForeignKey(ProcessTypeStatus, related_name='wo_next_status', on_delete=models.DO_NOTHING, db_column='nextStatus')
+    status = models.ForeignKey(ProcessTypeStatus, related_name='wo_current_status', on_delete=models.DO_NOTHING,
+                               db_column='statusId')
+    next_status = models.ForeignKey(ProcessTypeStatus, related_name='wo_next_status', on_delete=models.DO_NOTHING,
+                                    db_column='nextStatus')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
 
     class Meta:
@@ -414,8 +437,10 @@ class Workflow(models.Model):
 class WorkflowEvent(models.Model):
     id = models.AutoField(primary_key=True)
     process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
-    previous_status = models.ForeignKey(ProcessTypeStatus, related_name='event_previous_status', on_delete=models.DO_NOTHING, db_column='previousStatus')
-    new_status = models.ForeignKey(ProcessTypeStatus, related_name='wo_new_status', on_delete=models.DO_NOTHING, db_column='newStatus')
+    previous_status = models.ForeignKey(ProcessTypeStatus, related_name='event_previous_status',
+                                        on_delete=models.DO_NOTHING, db_column='previousStatus')
+    new_status = models.ForeignKey(ProcessTypeStatus, related_name='wo_new_status', on_delete=models.DO_NOTHING,
+                                   db_column='newStatus')
     workflow = models.ForeignKey(Workflow, on_delete=models.DO_NOTHING, db_column='workflowId')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
 
@@ -454,7 +479,8 @@ class Workorder(models.Model):
     started_datetime = models.DateTimeField(db_column='startedDatetime', blank=True, null=True)
     scheduled_datetime = models.DateTimeField(db_column='scheduledDatetime', blank=True, null=True)
     completed_datetime = models.DateTimeField(db_column='completedDatetime', blank=True, null=True)
-    reported_fault = models.ForeignKey(Fault, on_delete=models.DO_NOTHING, db_column='reportedFaultId', blank=True, null=True)
+    reported_fault = models.ForeignKey(Fault, on_delete=models.DO_NOTHING, db_column='reportedFaultId', blank=True,
+                                       null=True)
     detected_fault = models.IntegerField(db_column='detectedFaultId', blank=True, null=True)
     lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
     subject = models.CharField(max_length=255, blank=True, null=True)
@@ -490,8 +516,10 @@ class ClosedWorkorder(models.Model):
     started_datetime = models.DateTimeField(db_column='startedDatetime', blank=True, null=True)
     scheduled_datetime = models.DateTimeField(db_column='scheduledDatetime', blank=True, null=True)
     completed_datetime = models.DateTimeField(db_column='completedDatetime', blank=True, null=True)
-    reported_fault = models.ForeignKey(Fault, related_name='wo_reported_fault', on_delete=models.DO_NOTHING, db_column='reportedFaultId', blank=True, null=True)
-    detected_fault = models.ForeignKey(Fault, related_name='wo_detected_fault', on_delete=models.DO_NOTHING, db_column='detectedFaultId', blank=True, null=True)
+    reported_fault = models.ForeignKey(Fault, related_name='wo_reported_fault', on_delete=models.DO_NOTHING,
+                                       db_column='reportedFaultId', blank=True, null=True)
+    detected_fault = models.ForeignKey(Fault, related_name='wo_detected_fault', on_delete=models.DO_NOTHING,
+                                       db_column='detectedFaultId', blank=True, null=True)
     lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
     subject = models.CharField(max_length=255, blank=True, null=True)
     description = models.CharField(max_length=32000, blank=True, null=True)
@@ -512,7 +540,8 @@ class ClosedWorkorder(models.Model):
 class Callout(models.Model):
     id = models.AutoField(primary_key=True)
     is_printed = models.IntegerField(db_column='isPrinted', blank=True, null=True)
-    technician_fault = models.ForeignKey(Fault, on_delete=models.DO_NOTHING, db_column='technicianFaultId', blank=True, null=True)
+    technician_fault = models.ForeignKey(Fault, on_delete=models.DO_NOTHING, db_column='technicianFaultId', blank=True,
+                                         null=True)
     priority = models.ForeignKey(Priority, on_delete=models.DO_NOTHING, db_column='priorityId', blank=True, null=True)
     florNumber = models.CharField(db_column='floorNo', max_length=255, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
@@ -520,7 +549,8 @@ class Callout(models.Model):
     correction = models.ForeignKey(Correction, models.DO_NOTHING, db_column='correctionId')
     attributable_id = models.IntegerField(db_column='attributableId', blank=True, null=True)
     tech_description = models.CharField(db_column='techDescription', max_length=255, blank=True, null=True)
-    workorder = models.OneToOneField(Workorder, on_delete=models.DO_NOTHING, db_column='workorderId', blank=True, null=True)
+    workorder = models.OneToOneField(Workorder, on_delete=models.DO_NOTHING, db_column='workorderId', blank=True,
+                                     null=True)
     docket_number = models.CharField(db_column='docketNumber', max_length=255, blank=True, null=True)
     callout_time = models.DateTimeField(db_column='calloutTime', blank=True, null=True)
     time_arrival = models.DateTimeField(db_column='timeArrival', blank=True, null=True)
