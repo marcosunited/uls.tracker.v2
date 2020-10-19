@@ -1,4 +1,5 @@
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
+from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from django.utils import timezone
 
@@ -22,7 +23,7 @@ class UserManager(BaseUserManager):
         return self.create_user(nick_name, password, **extra_fields)
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True, db_column="user_id")
     firstName = models.CharField(max_length=30, db_column="first_name")
     lastName = models.CharField(max_length=30, db_column="last_name")
