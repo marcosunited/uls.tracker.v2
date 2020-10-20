@@ -1,10 +1,12 @@
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
+from rest_framework.relations import PrimaryKeyRelatedField
 
 from mrsauth.models import User
 
 
 class UsersSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = ('id',
@@ -38,3 +40,24 @@ class UsersSerializer(serializers.ModelSerializer):
         except KeyError:
             pass
         return user
+
+
+class PermissionsSerializer(serializers.ModelSerializer):
+    content_type = serializers.PrimaryKeyRelatedField(many=False, queryset=ContentType.objects.all())
+
+    class Meta:
+        model = Permission
+        fields = ('id',
+                  'name',
+                  'content_type',
+                  'codename')
+
+
+class GroupsSerializer(serializers.ModelSerializer):
+    permissions = PrimaryKeyRelatedField(many=True, queryset=Permission.objects.all())
+
+    class Meta:
+        model = Group
+        fields = ('id',
+                  'name',
+                  'permissions')
