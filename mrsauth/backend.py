@@ -1,7 +1,7 @@
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.hashers import check_password
 
-from .models import User
+from mrsauth.models import User
 
 
 class ModelAuthentication(ModelBackend):
@@ -13,6 +13,7 @@ class ModelAuthentication(ModelBackend):
 
             if getattr(user, 'statusId', 1) and check_password(password, user.password) is True:
                 return user
+
         except User.DoesNotExist:
             return None
 

@@ -3,11 +3,12 @@ from django.urls import include
 from rest_framework import routers
 
 from mrsauth.views import user, login
-from mrsauth.views.AuthorizationViewSets import GroupViewSet, PermissionViewSet
+from mrsauth.views.AuthorizationViewSets import GroupViewSet, PermissionViewSet, ProfileViewSet
 
 router = routers.DefaultRouter()
 router.register(r'groups', GroupViewSet)  # groups url
 router.register(r'permissions', PermissionViewSet)  # permissions url
+router.register(r'profiles', ProfileViewSet)  # profiles url
 
 urlpatterns = [
     # Login url

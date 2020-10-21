@@ -1,8 +1,7 @@
 # UNITED LIFTS MRS BASE MODEL
 from auditlog.registry import auditlog
 from django.db import models
-from django.contrib.auth.models import User
-
+from mrsauth.models import User
 
 class ServiceTarget(models.Model):
     id = models.AutoField(primary_key=True)
@@ -96,21 +95,22 @@ class Title(models.Model):
 
 class Profile(models.Model):
     id = models.AutoField(primary_key=True)
-    title = models.ForeignKey(User, on_delete=models.DO_NOTHING, db_column='titleId')
+    user = models.ForeignKey(User, related_name='profiles', on_delete=models.DO_NOTHING, db_column='userId')
     fullname = models.CharField(db_column='fullName', max_length=50, blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
     email = models.CharField(max_length=50, blank=True, null=True)
     email_verified = models.IntegerField(db_column='emailVerified', blank=True, null=True)
-    title = models.ForeignKey(Title, on_delete=models.DO_NOTHING, db_column='titleId')
+    title = models.ForeignKey(Title, on_delete=models.DO_NOTHING, db_column='titleId', blank=True, null=True)
     street_address = models.CharField(db_column='streetAddress', max_length=255, blank=True, null=True)
     postcode = models.CharField(db_column='postCode', max_length=12, blank=True, null=True)
     country = models.ForeignKey(Country, on_delete=models.DO_NOTHING, db_column='countryId', blank=True, null=True)
     phone_verified = models.IntegerField(db_column='phoneVerified', blank=True, null=True)
-    status = models.IntegerField(db_column='statusId', unique=True)
+    status = models.IntegerField(db_column='statusId', blank=True, null=True)
     last_position = models.TextField(db_column='lastPosition', blank=True, null=True)
-    localization_code = models.CharField(db_column='localizationCode', max_length=8)
-    projects = models.ManyToManyField(Project)
-    is_active = models.BooleanField(default=True, db_column='isActive')
+    localization_code = models.CharField(db_column='localizationCode', max_length=8, blank=True, null=True)
+    currency_code = models.CharField(db_column='currencyCode', max_length=3, blank=True, null=True)
+    projects = models.ManyToManyField(Project, blank=True, null=True)
+    is_active = models.BooleanField(default=True, db_column='isActive', blank=True, null=True)
 
     class Meta:
         managed = True
@@ -201,16 +201,6 @@ class Inventory(models.Model):
     class Meta:
         managed = True
         db_table = 'inventory'
-
-
-class Console(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=50)
-    version = models.CharField(max_length=10)
-
-    class Meta:
-        managed = True
-        db_table = 'consoles'
 
 
 class ContractFrequency(models.Model):
@@ -401,22 +391,6 @@ class Settings(models.Model):
         managed = True
         db_table = 'settings'
 
-"""
-class UsersHistoryLogins(models.Model):
-    id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, db_column='userId')
-    console = models.ForeignKey(Console, on_delete=models.DO_NOTHING, db_column='consoleId')
-    device_imei = models.CharField(db_column='deviceIMEI', max_length=255, blank=True, null=True)
-    browser_agent = models.CharField(db_column='browserAgent', max_length=255, blank=True, null=True)
-    version = models.CharField(max_length=10, blank=True, null=True)
-    position = models.TextField(blank=True, null=True)
-    login_datetime = models.DateTimeField(db_column='singInDatetime')
-    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
-
-    class Meta:
-        managed = True
-        db_table = 'users_history_logins'
-"""
 
 class Workflow(models.Model):
     id = models.AutoField(primary_key=True)

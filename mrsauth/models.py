@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
@@ -30,6 +32,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     nick_name = models.CharField(max_length=20, db_column="nick_name", unique=True)
     password = models.TextField()
     salt = models.TextField()
+    authentication_provider = models.CharField(max_length=30, db_column="auth_provider", blank=True, null=True)
     statusId = models.IntegerField(db_column="state_id")
     createdDate = models.FloatField(blank=True, null=True, db_column="created")
     updatedDate = models.FloatField(blank=True, null=True, db_column="updated")
@@ -53,3 +56,27 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         app_label = 'mrsauth'
+
+
+class Console(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+    version = models.CharField(max_length=10)
+
+    class Meta:
+        managed = True
+        db_table = 'consoles'
+
+
+class UsersHistoryLogin(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, db_column='userId')
+    console = models.ForeignKey(Console, on_delete=models.DO_NOTHING, db_column='consoleId')
+    device_imei = models.CharField(db_column='deviceIMEI', max_length=255, blank=True, null=True)
+    user_agent = models.CharField(db_column='userAgent', max_length=255, blank=True, null=True)
+    position = models.TextField(blank=True, null=True)
+    login_datetime = models.DateTimeField(db_column='singInDatetime', default=datetime.now())
+
+    class Meta:
+        managed = True
+        db_table = 'users_history_logins'
