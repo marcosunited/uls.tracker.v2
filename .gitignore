@@ -1,4 +1,6 @@
 
 .idea/
-mrsModel/__pycache__/
-mrsModel/migrations/
+mrs/__pycache__/
+mrs/migrations/
+mrs/mrs.iml
+mrsauth/migrations/
