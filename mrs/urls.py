@@ -16,8 +16,24 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework import routers
+
+
+from mrs.views.ProjectViewSets import *
+
+router = routers.DefaultRouter()
+router.register(r'projects', ProjectViewSet)  # projects url
+router.register(r'contacts', ContactViewSet)  # contacts url
+router.register(r'contracts', ContractViewSet)  # contracts url
+router.register(r'contractsfrequencies', ContractFrequencyViewSet)  # contractsfrequencies url
+router.register(r'jobs', JobViewSet)  # jobs url
+router.register(r'rounds', RoundViewSet)  # jobs url
+router.register(r'agents', AgentViewSet)  # jobs url
+router.register(r'technicians', TechnicianViewSet)  # jobs url
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^', include('mrsauth.urls')),
+
+    url(r'^api/v1/', include(router.urls)),
 ]

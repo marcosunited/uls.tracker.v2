@@ -222,7 +222,7 @@ class Contract(models.Model):
     reactive_datetime = models.DateTimeField(db_column='reactiveDatetime', blank=True, null=True)
     cancel_datetime = models.CharField(db_column='cancelDatetime', max_length=255, blank=True, null=True)
     price = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True)
-    frequency_mtn_id = models.IntegerField(db_column='frequencyMtnId', unique=True, blank=True, null=True)
+    frequency_mtn_id = models.IntegerField(db_column='frequencyMtnId', unique=True)
     contact = models.OneToOneField(Contact, on_delete=models.CASCADE)
     contract_frequency = models.OneToOneField(ContractFrequency, on_delete=models.CASCADE)
     notes = models.CharField(max_length=255, blank=True, null=True)
@@ -268,10 +268,10 @@ class JhaItem(models.Model):
 class Round(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
-    is_active = models.IntegerField(db_column='isActive')
+    is_active = models.BooleanField(db_column='isActive')
     colour = models.CharField(max_length=30, blank=True, null=True)
     polygon = models.TextField(blank=True, null=True)
-    publications = models.ManyToManyField(Technician)
+    technicians = models.ManyToManyField(Technician)
 
     class Meta:
         managed = True
@@ -293,11 +293,11 @@ class Job(models.Model):
     number = models.IntegerField()
     name = models.CharField(max_length=50)
     contact = models.OneToOneField(Contact, on_delete=models.DO_NOTHING)
-    project_id = models.IntegerField(db_column='projectId', unique=True)
+    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
     contract = models.OneToOneField(Contract, on_delete=models.CASCADE)
     agent = models.OneToOneField(Agent, on_delete=models.DO_NOTHING)
     round = models.ForeignKey(Round, on_delete=models.DO_NOTHING, db_column='roundId')
-    service_type_id = models.IntegerField(db_column='serviceTypeId', unique=True)
+    service_type_id = models.IntegerField(db_column='serviceTypeId')
     floors = models.CharField(max_length=255, blank=True, null=True)
     postcode = models.CharField(db_column='postCode', max_length=12, blank=True, null=True)
     contact = models.OneToOneField(Contact, on_delete=models.CASCADE)

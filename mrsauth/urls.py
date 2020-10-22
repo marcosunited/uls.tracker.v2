@@ -6,7 +6,7 @@ from mrsauth.views import UserViewSet, login
 from mrsauth.views.AuthorizationViewSets import GroupViewSet, PermissionViewSet, ProfileViewSet
 
 router = routers.DefaultRouter()
-router.register(r'groups', GroupViewSet)  # groups url
+router.register(r'groups', GroupViewSet, basename='groups')  # groups url
 router.register(r'permissions', PermissionViewSet)  # permissions url
 router.register(r'profiles', ProfileViewSet)  # profiles url
 
