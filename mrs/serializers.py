@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.relations import PrimaryKeyRelatedField
 
 from mrs.models import *
+from mrs.utils.filter import DynamicFieldsModelSerializer
 
 
 class ProjectsSerializer(serializers.ModelSerializer):
@@ -56,7 +57,7 @@ class ContractsSerializer(serializers.ModelSerializer):
                   'notes')
 
 
-class JobsSerializer(serializers.ModelSerializer):
+class JobsSerializer(DynamicFieldsModelSerializer):
     contract = PrimaryKeyRelatedField(many=False, queryset=Contract.objects.all())
     contact = PrimaryKeyRelatedField(many=False, queryset=Contact.objects.all())
     project = PrimaryKeyRelatedField(many=False, queryset=Project.objects.all())

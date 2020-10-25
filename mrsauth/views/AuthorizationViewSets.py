@@ -1,5 +1,3 @@
-from typing import TypeVar
-
 from django.contrib.auth.models import Group, Permission
 
 from mrs.models import Profile
