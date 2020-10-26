@@ -2,6 +2,7 @@ from mrs.models import Project, Contact, Contract, ContractFrequency, Job, Round
 from mrs.serializers import ProjectsSerializer, ContractsSerializer, ContactsSerializer, ContractFrequenciesSerializer, \
     JobsSerializer, RoundsSerializer, AgentsSerializer, TechniciansSerializer
 from mrs.utils.cache import CachedModelViewSet
+from mrs.utils.filter import FilteredModelViewSet
 
 
 class ProjectViewSet(CachedModelViewSet):
@@ -24,7 +25,7 @@ class ContractFrequencyViewSet(CachedModelViewSet):
     serializer_class = ContractFrequenciesSerializer
 
 
-class JobViewSet(CachedModelViewSet):
+class JobViewSet(FilteredModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobsSerializer
 

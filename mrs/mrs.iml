@@ -14,7 +14,9 @@
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
-    <content url="file://$MODULE_DIR$" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
+    </content>
     <content url="file://$MODULE_DIR$/../mrsauth" />
     <orderEntry type="jdk" jdkName="Python 3.8 virtualenv at C:\ULS\Sources\Projects\environments\myenv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

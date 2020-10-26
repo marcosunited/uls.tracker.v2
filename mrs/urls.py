@@ -17,11 +17,11 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-
+from mrs.utils.filter import QueryRouter
 
 from mrs.views.ProjectViewSets import *
 
-router = routers.DefaultRouter()
+router = QueryRouter()
 router.register(r'projects', ProjectViewSet)  # projects url
 router.register(r'contacts', ContactViewSet)  # contacts url
 router.register(r'contracts', ContractViewSet)  # contracts url
