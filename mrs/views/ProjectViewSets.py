@@ -1,24 +1,23 @@
 from mrs.serializers import *
-from mrs.utils.cache import CachedModelViewSet
 from mrs.utils.filter import FilteredModelViewSet
 
 
-class ProjectViewSet(CachedModelViewSet):
+class ProjectViewSet(FilteredModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectsSerializer
 
 
-class ContactViewSet(CachedModelViewSet):
+class ContactViewSet(FilteredModelViewSet):
     queryset = Contact.objects.all()
     serializer_class = ContactsSerializer
 
 
-class ContractViewSet(CachedModelViewSet):
+class ContractViewSet(FilteredModelViewSet):
     queryset = Contract.objects.all()
     serializer_class = ContractsSerializer
 
 
-class ContractFrequencyViewSet(CachedModelViewSet):
+class ContractFrequencyViewSet(FilteredModelViewSet):
     queryset = ContractFrequency.objects.all()
     serializer_class = ContractFrequenciesSerializer
 
@@ -28,17 +27,17 @@ class JobViewSet(FilteredModelViewSet):
     serializer_class = JobsSerializer
 
 
-class RoundViewSet(CachedModelViewSet):
+class RoundViewSet(FilteredModelViewSet):
     queryset = Round.objects.all()
     serializer_class = RoundsSerializer
 
 
-class AgentViewSet(CachedModelViewSet):
+class AgentViewSet(FilteredModelViewSet):
     queryset = Agent.objects.all()
     serializer_class = AgentsSerializer
 
 
-class TechnicianViewSet(CachedModelViewSet):
+class TechnicianViewSet(FilteredModelViewSet):
     queryset = Technician.objects.all()
     serializer_class = TechniciansSerializer
 
