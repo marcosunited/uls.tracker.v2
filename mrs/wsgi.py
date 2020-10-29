@@ -1,5 +1,5 @@
 """
-WSGI config for mrsModel project.
+WSGI config for mrs project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
