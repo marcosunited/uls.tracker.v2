@@ -1,22 +1,47 @@
 from rest_framework import serializers
 from rest_framework.routers import DefaultRouter, Route, DynamicRoute
 
+from mrs.models import Settings
 from mrs.utils.cache import CachedModelViewSet
+
+from django.db.models import Lookup
+from django.db.models.fields import Field
+
+
+class NotEqual(Lookup):
+    lookup_name = 'ne'
+
+    def as_sql(self, qn, connection):
+        lhs, lhs_params = self.process_lhs(qn, connection)
+        rhs, rhs_params = self.process_rhs(qn, connection)
+        params = lhs_params + rhs_params
+        return '%s <> %s' % (lhs, rhs), params
+
+
+# register ne (not equal) lookup to filter
+# use: results = Model.objects.exclude(a=True, x__ne=5)
+Field.register_lookup(NotEqual)
 
 
 class FilteredModelViewSet(CachedModelViewSet):
+    operators = {}
 
     def get_queryset(self):
+        if not FilteredModelViewSet.operators.keys():
+            queries_setting = Settings.objects.filter(module='APIQUERIES')
+            for operator in queries_setting:
+                FilteredModelViewSet.operators.update({operator.code: operator.value})
 
         query_set = super().get_queryset()
         if self.request.method == 'POST':
             query_list = self.request.data["query"]
-
             for q in query_list:
                 kwargs = {}
-                kwargs.update({q.get('field'): q.get('value')})
+                op = "__exact"
+                if q.get('operator'):
+                    op = FilteredModelViewSet.operators.get(q.get('operator'))
+                kwargs.update({q.get('field') + op: q.get('value')})
                 query_set = query_set.filter(**kwargs)
-
             return query_set
         return query_set
 

@@ -3,6 +3,7 @@ from auditlog.registry import auditlog
 from django.db import models
 from mrsauth.models import User
 
+
 class ServiceTarget(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
@@ -57,6 +58,8 @@ class Project(models.Model):
         managed = True
         db_table = 'projects'
 
+    def __str__(self):
+        return self.name
 
 class ProcessType(models.Model):
     id = models.AutoField(primary_key=True)
@@ -116,6 +119,9 @@ class Profile(models.Model):
         managed = True
         db_table = 'profile'
 
+    def __str__(self):
+        return self.fullname
+
 
 class Contact(models.Model):
     id = models.AutoField(primary_key=True)
@@ -132,6 +138,8 @@ class Contact(models.Model):
         managed = True
         db_table = 'contacts'
 
+    def __str__(self):
+        return self.first_name + " " + self.last_name
 
 class Attachment(models.Model):
     id = models.AutoField(primary_key=True)
@@ -163,6 +171,9 @@ class Technician(models.Model):
     class Meta:
         managed = True
         db_table = 'technicians'
+
+    def __str__(self):
+        return self.profile.fullname
 
 
 class Supplier(models.Model):
@@ -211,6 +222,9 @@ class ContractFrequency(models.Model):
         managed = True
         db_table = 'contracts_frequencies'
 
+    def __str__(self):
+        return self.name
+
 
 class Contract(models.Model):
     id = models.AutoField(primary_key=True)
@@ -230,6 +244,9 @@ class Contract(models.Model):
     class Meta:
         managed = True
         db_table = 'contracts'
+
+    def __str__(self):
+        return self.name
 
 
 class Correction(models.Model):
@@ -277,6 +294,9 @@ class Round(models.Model):
         managed = True
         db_table = 'rounds'
 
+    def __str__(self):
+        return self.name
+
 
 class Agent(models.Model):
     id = models.AutoField(primary_key=True)
@@ -286,6 +306,9 @@ class Agent(models.Model):
     class Meta:
         managed = True
         db_table = 'agents'
+
+    def __str__(self):
+        return self.name + " - " + self.contact.first_name + " " + self.contact.last_name
 
 
 class Job(models.Model):
@@ -308,10 +331,12 @@ class Job(models.Model):
     suburb = models.CharField(db_column='suburb', max_length=50, blank=True, null=True)
     lifts = models.IntegerField()
 
+    class Meta:
+        managed = True
+        db_table = 'jobs'
 
-class Meta:
-    managed = True
-    db_table = 'jobs'
+    def __str__(self):
+        return self.name
 
 
 class Lift(models.Model):
@@ -386,10 +411,18 @@ class Settings(models.Model):
     code = models.CharField(max_length=3)
     description = models.CharField(max_length=255, blank=True, null=True)
     value = models.CharField(max_length=255)
+    value1 = models.CharField(max_length=255, blank=True, null=True)
+    value2 = models.CharField(max_length=255, blank=True, null=True)
+    value3 = models.CharField(max_length=255, blank=True, null=True)
+    value4 = models.CharField(max_length=255, blank=True, null=True)
+    value5 = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = True
         db_table = 'settings'
+
+    def __str__(self):
+        return self.module + "(" + self.code + ")"
 
 
 class Workflow(models.Model):

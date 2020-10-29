@@ -1,6 +1,4 @@
-from mrs.models import Project, Contact, Contract, ContractFrequency, Job, Round, Agent, Technician
-from mrs.serializers import ProjectsSerializer, ContractsSerializer, ContactsSerializer, ContractFrequenciesSerializer, \
-    JobsSerializer, RoundsSerializer, AgentsSerializer, TechniciansSerializer
+from mrs.serializers import *
 from mrs.utils.cache import CachedModelViewSet
 from mrs.utils.filter import FilteredModelViewSet
 
