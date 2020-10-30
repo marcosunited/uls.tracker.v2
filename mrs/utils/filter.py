@@ -1,11 +1,22 @@
-from rest_framework import serializers
-from rest_framework.routers import DefaultRouter, Route, DynamicRoute
+from abc import ABC
 
-from mrs.models import Settings
+from django.apps import apps
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from rest_framework import serializers, status
+from rest_framework.response import Response
+from rest_framework.routers import DefaultRouter, Route, DynamicRoute
+from rest_framework.status import HTTP_200_OK
+from rest_framework.views import APIView
+
+from mrs.models import Settings, MrsField, MrsOperator
 from mrs.utils.cache import CachedModelViewSet
 
-from django.db.models import Lookup
+from django.db.models import Lookup, Model
 from django.db.models.fields import Field
+
+from mrs.utils.response import ResponseHttp as ObjectResponse
 
 
 class NotEqual(Lookup):
@@ -22,6 +33,52 @@ class NotEqual(Lookup):
 # use: results = Model.objects.exclude(a=True, x__ne=5)
 Field.register_lookup(NotEqual)
 
+
+class MrsOperatorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MrsOperator
+        fields = ('id',
+                  'name',
+                  'code',
+                  'django_lookup')
+
+
+class MrsFieldSerializer(serializers.ModelSerializer):
+    operators = MrsOperatorSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = MrsField
+        fields = ('id',
+                  'name',
+                  'operators',
+                  'isList',
+                  'list_source_model')
+
+
+class MetaSerializer(serializers.Serializer):
+    fields = MrsFieldSerializer(read_only=True, many=True)
+
+
+class ModelMetaView(APIView):
+    fields = {}
+
+    def get(self, request, model):
+
+        model = apps.get_model('mrs', model)
+        for field in model._meta.get_fields():
+            try:
+                field_name = field.__class__.__name__
+                field = MrsField.objects.filter(name=field_name)
+                if field:
+                    field_serializer = MrsFieldSerializer(field)
+                    self.fields.update({field_name: field_serializer.data})
+
+            except AttributeError as e:
+                print(e)
+
+        response = ObjectResponse(self.fields)
+        return Response(response.result,
+                        status=HTTP_200_OK)
 
 class FilteredModelViewSet(CachedModelViewSet):
     operators = {}

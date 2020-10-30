@@ -109,3 +109,9 @@ class AgentsSerializer(serializers.ModelSerializer):
         fields = ('id',
                   'name',
                   'contact')
+
+
+"""
+SYSTEM SERIALIZERS
+"""
+

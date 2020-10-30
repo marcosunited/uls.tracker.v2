@@ -63,6 +63,7 @@ class Project(models.Model):
     def __str__(self):
         return self.name
 
+
 class ProcessType(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
@@ -142,6 +143,7 @@ class Contact(models.Model):
 
     def __str__(self):
         return self.first_name + " " + self.last_name
+
 
 class Attachment(models.Model):
     id = models.AutoField(primary_key=True)
@@ -631,3 +633,37 @@ class WorkorderPosition(models.Model):
     class Meta:
         managed = True
         db_table = 'workorders_positions'
+
+
+"""
+SYSTEM MODELS
+"""
+
+
+class MrsOperator(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+    code = models.CharField(max_length=50)
+    django_lookup = models.CharField(max_length=50)
+
+    class Meta:
+        managed = True
+        db_table = 'mrs_mrsoperator'
+
+    def __str__(self):
+        return self.name
+
+
+class MrsField(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50, unique=True)
+    operators = models.ManyToManyField(MrsOperator)
+    isList = models.BooleanField(default=False)
+    list_source_model = models.CharField(max_length=50, blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'mrs_fields'
+
+    def __str__(self):
+        return self.name

@@ -4,7 +4,7 @@ mrs URL Configuration
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
-from mrs.utils.filter import QueryRouter
+from mrs.utils.filter import QueryRouter, ModelMetaView
 
 from mrs.views.ProjectViewSets import *
 
@@ -21,5 +21,6 @@ router.register(r'technicians', TechnicianViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^', include('mrsauth.urls')),
+    url(r'^api/v1/meta/(?P<model>\D+)/', ModelMetaView.as_view()),
     url(r'^api/v1/', include(router.urls)),
 ]
