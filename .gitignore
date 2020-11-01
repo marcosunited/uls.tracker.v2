@@ -9,3 +9,5 @@ mrsauth/migrations/
 *.pyc
 *.iml
 *.iml
+*.pyc
+*.iml

@@ -96,14 +96,18 @@ class FilteredModelViewSet(CachedModelViewSet):
         query_set = super().get_queryset()
         if self.request.method == 'POST':
             query_list = self.request.data["query"]
+            order_by = self.request.data["orderBy"]
+            kwargs = {}
             for q in query_list:
-                kwargs = {}
                 op = "__exact"
-                if q.get('operator'):
+                if q.get('operator') and q.get('value'):
                     op = FilteredModelViewSet.operators.get(q.get('operator'))
-                kwargs.update({q.get('field') + op: q.get('value')})
-                query_set = query_set.filter(**kwargs)
+                    kwargs.update({q.get('field') + op: q.get('value')})
+                    query_set = query_set.filter(**kwargs)
+            if order_by:
+                query_set.order_by(order_by)
             return query_set
+
         return query_set
 
 
