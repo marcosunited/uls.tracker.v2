@@ -4,3 +4,8 @@ mrs/__pycache__/
 mrs/migrations/
 mrs/mrs.iml
 mrsauth/migrations/
+*.pyc
+*.iml
+*.pyc
+*.iml
+*.iml

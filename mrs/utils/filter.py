@@ -67,11 +67,14 @@ class ModelMetaView(APIView):
         model = apps.get_model('mrs', model)
         for field in model._meta.get_fields():
             try:
-                field_name = field.__class__.__name__
-                field = MrsField.objects.filter(name=field_name)
-                if field:
-                    field_serializer = MrsFieldSerializer(field)
-                    self.fields.update({field_name: field_serializer.data})
+                field_name = field.name
+                field_type = field.__class__.__name__
+                field = MrsField.objects.filter(name=field_type)
+                if field.count() == 1:
+                    field = field[0]
+                    if field:
+                        field_serializer = MrsFieldSerializer(field)
+                        self.fields.update({field_name: field_serializer.data})
 
             except AttributeError as e:
                 print(e)
@@ -79,6 +82,7 @@ class ModelMetaView(APIView):
         response = ObjectResponse(self.fields)
         return Response(response.result,
                         status=HTTP_200_OK)
+
 
 class FilteredModelViewSet(CachedModelViewSet):
     operators = {}
