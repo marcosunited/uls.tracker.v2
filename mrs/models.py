@@ -317,9 +317,9 @@ class Agent(models.Model):
 
 class Job(models.Model):
     id = models.AutoField(primary_key=True)
-    number = models.IntegerField()
-    name = models.CharField(max_length=50)
-    contact = models.OneToOneField(Contact, on_delete=models.DO_NOTHING)
+    number = models.IntegerField(verbose_name='Number')
+    name = models.CharField(max_length=50, verbose_name='Name')
+    contact = models.OneToOneField(Contact, on_delete=models.DO_NOTHING, verbose_name='Contact')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
     contract = models.OneToOneField(Contract, on_delete=models.CASCADE)
     agent = models.OneToOneField(Agent, on_delete=models.DO_NOTHING)
@@ -330,7 +330,7 @@ class Job(models.Model):
     contact = models.OneToOneField(Contact, on_delete=models.CASCADE)
     key_access_details = models.CharField(db_column='keyAccessDetails', max_length=255, blank=True, null=True)
     notes = models.CharField(max_length=4000, blank=True, null=True)
-    position = models.TextField(blank=True, null=True)  # This field type is a guess.
+    position = models.TextField(blank=True, null=True)
     address = models.CharField(db_column='address', max_length=100, blank=True, null=True)
     suburb = models.CharField(db_column='suburb', max_length=50, blank=True, null=True)
     lifts = models.IntegerField()
@@ -551,8 +551,7 @@ class ClosedWorkorder(models.Model):
 class Callout(models.Model):
     id = models.AutoField(primary_key=True)
     is_printed = models.IntegerField(db_column='isPrinted', blank=True, null=True)
-    technician_fault = models.ForeignKey(Fault, on_delete=models.DO_NOTHING, db_column='technicianFaultId', blank=True,
-                                         null=True)
+    technician_fault = models.ForeignKey(Fault, on_delete=models.DO_NOTHING, db_column='technicianFaultId', default='1')
     priority = models.ForeignKey(Priority, on_delete=models.DO_NOTHING, db_column='priorityId', blank=True, null=True)
     florNumber = models.CharField(db_column='floorNo', max_length=255, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
@@ -560,8 +559,7 @@ class Callout(models.Model):
     correction = models.ForeignKey(Correction, models.DO_NOTHING, db_column='correctionId')
     attributable_id = models.IntegerField(db_column='attributableId', blank=True, null=True)
     tech_description = models.CharField(db_column='techDescription', max_length=255, blank=True, null=True)
-    workorder = models.OneToOneField(Workorder, on_delete=models.DO_NOTHING, db_column='workorderId', blank=True,
-                                     null=True)
+    workorder = models.OneToOneField(Workorder, on_delete=models.DO_NOTHING, db_column='workorderId', default='1')
     docket_number = models.CharField(db_column='docketNumber', max_length=255, blank=True, null=True)
     callout_time = models.DateTimeField(db_column='calloutTime', blank=True, null=True)
     time_arrival = models.DateTimeField(db_column='timeArrival', blank=True, null=True)

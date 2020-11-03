@@ -1,20 +1,15 @@
-from abc import ABC
-
 from django.apps import apps
-from django.http import JsonResponse
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
-from rest_framework import serializers, status
+from django.db.models import Lookup
+from django.db.models.fields import Field
+
+from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.routers import DefaultRouter, Route, DynamicRoute
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
-from mrs.models import Settings, MrsField, MrsOperator
+from mrs.models import MrsField, MrsOperator
 from mrs.utils.cache import CachedModelViewSet
-
-from django.db.models import Lookup, Model
-from django.db.models.fields import Field
 
 from mrs.utils.response import ResponseHttp as ObjectResponse
 
@@ -60,21 +55,22 @@ class MetaSerializer(serializers.Serializer):
 
 
 class ModelMetaView(APIView):
-    fields = {}
+    fields = []
 
     def get(self, request, model):
 
         model = apps.get_model('mrs', model)
-        for field in model._meta.get_fields():
+        for _field in model._meta.get_fields():
             try:
-                field_name = field.name
-                field_type = field.__class__.__name__
-                field = MrsField.objects.filter(name=field_type)
+                field = MrsField.objects.filter(name=_field.__class__.__name__)
                 if field.count() == 1:
                     field = field[0]
                     if field:
                         field_serializer = MrsFieldSerializer(field)
-                        self.fields.update({field_name: field_serializer.data})
+                        self.fields.append({'name': _field.name,
+                                            'display': _field.verbose_name,
+                                            'isRelation': _field.is_relation,
+                                            'meta': field_serializer.data})
 
             except AttributeError as e:
                 print(e)
@@ -89,17 +85,24 @@ class FilteredModelViewSet(CachedModelViewSet):
 
     def get_queryset(self):
         if not FilteredModelViewSet.operators.keys():
-            queries_setting = Settings.objects.filter(module='APIQUERIES')
-            for operator in queries_setting:
-                FilteredModelViewSet.operators.update({operator.code: operator.value})
+            operators_setting = MrsOperator.objects.all()
+            for operator in operators_setting:
+                FilteredModelViewSet.operators.update({operator.code: operator.django_lookup})
 
         query_set = super().get_queryset()
         if self.request.method == 'POST':
-            query_list = self.request.data["query"]
-            order_by = self.request.data["orderBy"]
+            try:
+                query_list = self.request.data["query"]
+            except KeyError:
+                return query_set
+
+            try:
+                order_by = self.request.data["orderBy"]
+            except KeyError:
+                order_by = None
+
             kwargs = {}
             for q in query_list:
-                op = "__exact"
                 if q.get('operator') and q.get('value'):
                     op = FilteredModelViewSet.operators.get(q.get('operator'))
                     kwargs.update({q.get('field') + op: q.get('value')})
