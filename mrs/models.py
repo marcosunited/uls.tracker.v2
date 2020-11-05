@@ -1,4 +1,5 @@
 # UNITED LIFTS MRS BASE MODEL
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from mrsauth.models import User
 
@@ -631,6 +632,7 @@ class WorkorderPosition(models.Model):
     class Meta:
         managed = True
         db_table = 'workorders_positions'
+
 
 
 """
