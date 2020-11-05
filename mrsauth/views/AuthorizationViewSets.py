@@ -7,7 +7,7 @@ from mrs.utils.filter import FilteredModelViewSet
 
 
 class GroupViewSet(FilteredModelViewSet):
-    # queryset = Group.objects.all()
+    queryset = Group.objects.all()
     serializer_class = GroupsSerializer
 
     class Meta:

@@ -390,6 +390,13 @@ class LiftTask(models.Model):
         db_table = 'lifts_tasks'
 
 
+class LiftSchedule(models.Model):
+    id = models.AutoField(primary_key=True)
+    lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
+    task = models.ForeignKey(Task, on_delete=models.DO_NOTHING, db_column='taskId')
+    schedule_date = models.DateField(db_column='scheduleDate')
+
+
 class Priority(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
@@ -632,7 +639,6 @@ class WorkorderPosition(models.Model):
     class Meta:
         managed = True
         db_table = 'workorders_positions'
-
 
 
 """

@@ -1,10 +1,10 @@
 from django.http.response import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from django.views.decorators.vary import vary_on_cookie
+from django.db.models import Q
+
 from rest_framework.parsers import JSONParser
 from rest_framework import status
-from django.db.models import Q
 from rest_framework.views import APIView
 
 from ..models import User
@@ -13,8 +13,6 @@ from mrs.utils.response import ResponseHttp
 
 from rest_framework.status import (
     HTTP_200_OK,
-    HTTP_201_CREATED,
-    HTTP_202_ACCEPTED,
     HTTP_204_NO_CONTENT,
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
@@ -26,7 +24,6 @@ class UserList(APIView):
 
     # GET many items
 
-    @method_decorator(cache_page(60 * 60 * 2))
     def get(self, request):
         try:
             items = list(User.objects.all())
@@ -42,7 +39,6 @@ class UserInit(APIView):
 
     # Create new user
 
-    @method_decorator(cache_page(60 * 60 * 2))
     def post(self, request):
         user_data = JSONParser().parse(request)
         user_serializer = UsersSerializer(data=user_data)
@@ -54,9 +50,7 @@ class UserInit(APIView):
 
 
 # GET, PUT AND DELETE one item
-
 class UserDetail(APIView):
-
     @method_decorator(cache_page(60 * 60 * 2))
     def get(self, request, pk):
         try:
@@ -104,7 +98,6 @@ class UserDetail(APIView):
 
 # GET an item by condition
 class UserFilter(APIView):
-    @method_decorator(cache_page(60 * 60 * 2))
     def post(self, request):
         items = list(User.objects.filter(Q(firstName__icontains=request.data.get(
             'firstName')) | Q(lastName__icontains=request.data.get('lastName'))
