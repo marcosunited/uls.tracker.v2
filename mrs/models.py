@@ -1,6 +1,8 @@
 # UNITED LIFTS MRS BASE MODEL
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models import IntegerField
+
 from mrsauth.models import User
 
 
@@ -12,17 +14,6 @@ class ServiceTarget(models.Model):
     class Meta:
         managed = True
         db_table = 'services_targets'
-        app_label = 'mrs'
-
-
-class ServiceArea(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=50)
-    description = models.CharField(db_column='description', max_length=250)
-
-    class Meta:
-        managed = True
-        db_table = 'services_areas'
         app_label = 'mrs'
 
 
@@ -222,6 +213,7 @@ class Inventory(models.Model):
 class ContractFrequency(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
+    days_frequency = IntegerField()
 
     class Meta:
         managed = True
@@ -325,7 +317,6 @@ class Job(models.Model):
     contract = models.OneToOneField(Contract, on_delete=models.CASCADE)
     agent = models.OneToOneField(Agent, on_delete=models.DO_NOTHING)
     round = models.ForeignKey(Round, on_delete=models.DO_NOTHING, db_column='roundId')
-    service_type_id = models.IntegerField(db_column='serviceTypeId')
     floors = models.CharField(max_length=255, blank=True, null=True)
     postcode = models.CharField(db_column='postCode', max_length=12, blank=True, null=True)
     contact = models.OneToOneField(Contact, on_delete=models.CASCADE)
@@ -365,45 +356,7 @@ class Lift(models.Model):
         db_table = 'lifts'
 
 
-class Task(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255)
-    description = models.CharField(max_length=255, blank=True, null=True)
-    default_month = models.ForeignKey(Month, on_delete=models.DO_NOTHING, db_column='defaultMonth')
-    service_target = models.ForeignKey(ServiceTarget, on_delete=models.DO_NOTHING, db_column='serviceTargetId')
-    service_area = models.ForeignKey(ServiceArea, on_delete=models.DO_NOTHING, db_column='serviceAreaId')
 
-    class Meta:
-        managed = True
-        db_table = 'tasks'
-
-
-class LiftTask(models.Model):
-    id = models.AutoField(primary_key=True)
-    task = models.ForeignKey(Task, on_delete=models.DO_NOTHING, db_column='taskId')
-    is_completed = models.IntegerField(db_column='isCompleted')
-    completed_Datetime = models.DateTimeField(db_column='completedDatetime')
-    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
-
-    class Meta:
-        managed = True
-        db_table = 'lifts_tasks'
-
-
-class LiftSchedule(models.Model):
-    id = models.AutoField(primary_key=True)
-    lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
-    task = models.ForeignKey(Task, on_delete=models.DO_NOTHING, db_column='taskId')
-    schedule_date = models.DateField(db_column='scheduleDate')
-
-
-class Priority(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=50)
-
-    class Meta:
-        managed = True
-        db_table = 'priority'
 
 
 class ServicesTypes(models.Model):
@@ -468,11 +421,20 @@ class WorkflowEvent(models.Model):
         db_table = 'workflow_event'
 
 
+
+class Priority(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+
+    class Meta:
+        managed = True
+        db_table = 'priority'
+
+
 class WorkorderLift(models.Model):
     id = models.AutoField(primary_key=True)
     lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId')
-    task = models.ForeignKey(Task, on_delete=models.DO_NOTHING, db_column='taskId')
     notes = models.CharField(max_length=255, blank=True, null=True)
     started_datetime = models.DateTimeField(db_column='startedDatetime', blank=True, null=True)
     completed_datetime = models.DateTimeField(db_column='completedDatetime', blank=True, null=True)
@@ -641,10 +603,54 @@ class WorkorderPosition(models.Model):
         db_table = 'workorders_positions'
 
 
+class Task(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    description = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'tasks'
+
+
+class Procedure(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    tasks = models.ManyToManyField(Task)
+    service_target = models.ForeignKey(ServiceTarget, on_delete=models.DO_NOTHING, db_column='serviceTargetId')
+
+    class Meta:
+        managed = True
+        db_table = 'procedures'
+
+
+class MaintenancePlan(models.Model):
+    id = models.AutoField(primary_key=True)
+    lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
+    procedures = models.ManyToManyField(Procedure)
+
+    class Meta:
+        managed = True
+        db_table = 'maintenance_plans'
+
+
+class ScheduleEntry(models.Model):
+    id = models.AutoField(primary_key=True)
+    notes = models.CharField(max_length=255, blank=True, null=True)
+    lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
+    procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, db_column='taskId')
+    schedule_date = models.DateField(db_column='scheduleDate')
+    workorder = models.OneToOneField(Workorder, on_delete=models.CASCADE, primary_key=False)
+
+    class Meta:
+        managed = True
+        db_table = 'schedule_entries'
+
+
 """
 SYSTEM MODELS
 """
-
 
 class MrsOperator(models.Model):
     id = models.AutoField(primary_key=True)
