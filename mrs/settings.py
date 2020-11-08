@@ -113,7 +113,7 @@ JWT_AUTH = {
 AUTH_USER_MODEL = 'mrsauth.User'
 
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-au'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True

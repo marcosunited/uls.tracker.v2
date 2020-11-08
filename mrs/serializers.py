@@ -74,7 +74,6 @@ class JobsSerializer(DynamicFieldsModelSerializer):
                   'project',
                   'agent',
                   'round',
-                  'service_type_id',
                   'lifts')
 
 

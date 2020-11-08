@@ -96,8 +96,8 @@ class Profile(models.Model):
     user = models.ForeignKey(User, related_name='profiles', on_delete=models.DO_NOTHING, db_column='userId')
     fullname = models.CharField(db_column='fullName', max_length=50, blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
-    email = models.CharField(max_length=50, blank=True, null=True)
-    email_verified = models.IntegerField(db_column='emailVerified', blank=True, null=True)
+    email = models.EmailField(max_length=200, blank=True, null=True)
+    email_verified = models.BooleanField(db_column='emailVerified', blank=True, null=True)
     title = models.ForeignKey(Title, on_delete=models.DO_NOTHING, db_column='titleId', blank=True, null=True)
     street_address = models.CharField(db_column='streetAddress', max_length=255, blank=True, null=True)
     postcode = models.CharField(db_column='postCode', max_length=12, blank=True, null=True)
@@ -126,7 +126,7 @@ class Contact(models.Model):
     last_name = models.CharField(max_length=70)
     phone_number = models.CharField(max_length=50)
     mobile_number = models.CharField(max_length=50)
-    email = models.CharField(max_length=50)
+    email = models.EmailField(max_length=200)
     address = models.CharField(max_length=250)
 
     class Meta:
@@ -213,7 +213,7 @@ class Inventory(models.Model):
 class ContractFrequency(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
-    days_frequency = IntegerField()
+    days_frequency = IntegerField(default=7)
 
     class Meta:
         managed = True
@@ -356,9 +356,6 @@ class Lift(models.Model):
         db_table = 'lifts'
 
 
-
-
-
 class ServicesTypes(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
@@ -419,7 +416,6 @@ class WorkflowEvent(models.Model):
     class Meta:
         managed = True
         db_table = 'workflow_event'
-
 
 
 class Priority(models.Model):
@@ -539,7 +535,7 @@ class Callout(models.Model):
     technician_signature = models.CharField(db_column='technicianSignature', max_length=255, blank=True, null=True)
     customer_signature = models.CharField(db_column='customerSignature', max_length=255, blank=True, null=True)
     accepted_id = models.IntegerField(db_column='acceptedId', blank=True, null=True)
-    notify_email = models.CharField(db_column='notifyEmail', max_length=50, blank=True, null=True)
+    notify_email = models.EmailField(db_column='notifyEmail', max_length=200, blank=True, null=True)
     verify = models.CharField(max_length=255, blank=True, null=True)
     reported_customer = models.CharField(db_column='reportedCustomer', max_length=255, blank=True, null=True)
     photo_name = models.CharField(db_column='photoName', max_length=50, blank=True, null=True)
@@ -651,6 +647,7 @@ class ScheduleEntry(models.Model):
 """
 SYSTEM MODELS
 """
+
 
 class MrsOperator(models.Model):
     id = models.AutoField(primary_key=True)

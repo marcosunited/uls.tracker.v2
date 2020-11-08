@@ -1,6 +1,8 @@
 """
 mrs URL Configuration
 """
+import sys, inspect
+
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
@@ -11,6 +13,7 @@ from mrs.utils.filter import QueryRouter, ModelMetaView
 from mrs.views.ProjectViewSets import *
 
 router = QueryRouter()
+
 router.register(r'projects', ProjectViewSet)
 router.register(r'contacts', ContactViewSet)
 router.register(r'contracts', ContractViewSet)
@@ -19,6 +22,18 @@ router.register(r'jobs', JobViewSet)
 router.register(r'rounds', RoundViewSet)
 router.register(r'agents', AgentViewSet)
 router.register(r'technicians', TechnicianViewSet)
+
+"""
+# dynamic views setup
+for name, obj in inspect.getmembers(sys.modules[__name__]):
+    if inspect.isclass(obj) and obj.__name__.endswith('Serializer'):
+        class_name = obj.__name__[0:obj.__name__.index('Serializer')]
+        view_class = type(class_name,
+                          (FilteredModelViewSet,),
+                          {'queryset': Job.objects.all(),
+                           'serializer_class': JobsSerializer})
+        router.register(class_name.lower(), view_class)
+"""
 
 urlpatterns = [
     path('admin/', admin.site.urls),
