@@ -676,3 +676,16 @@ class MrsField(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ContentTemplate(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=20)
+    content = models.TextField()
+
+    class Meta:
+        managed = True
+        db_table = 'content_templates'
+
+    def __str__(self):
+        return self.name

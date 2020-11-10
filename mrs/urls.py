@@ -5,7 +5,7 @@ import sys, inspect
 
 from django.conf.urls import url
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 
 from mrs.utils.storage import FileView
 from mrs.utils.filter import QueryRouter, ModelMetaView

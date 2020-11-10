@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'auditlog',
+    'background_task',
     'mrs',
     'mrsauth',
 ]
