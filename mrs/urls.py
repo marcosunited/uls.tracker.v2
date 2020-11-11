@@ -7,6 +7,7 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include, re_path
 
+from mrs.rules.rules import RulesMetaView
 from mrs.utils.storage import FileView
 from mrs.utils.filter import QueryRouter, ModelMetaView
 
@@ -39,6 +40,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^', include('mrsauth.urls')),
     url(r'^api/v1/meta/(?P<model>\D+)/', ModelMetaView.as_view()),
+    url(r'^api/v1/rules/meta/(?P<model>\D+)/', RulesMetaView.as_view()),
     url(r'^api/v1/upload/$', FileView.as_view(), name='file-upload'),
     url(r'^api/v1/', include(router.urls)),
 ]

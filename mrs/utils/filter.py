@@ -72,8 +72,7 @@ class ModelMetaView(APIView):
                 print(e)
 
         response = ObjectResponse(self.fields)
-        return Response(response.result,
-                        status=HTTP_200_OK)
+        return Response(response.result, status=HTTP_200_OK)
 
 
 class FilteredModelViewSet(CachedModelViewSet):

@@ -114,3 +114,14 @@ class AgentsSerializer(serializers.ModelSerializer):
 SYSTEM SERIALIZERS
 """
 
+
+class RulesSerializer(serializers.ModelSerializer):
+    content_type = PrimaryKeyRelatedField(many=False, queryset=ContentType.objects.all())
+
+    class Meta:
+        model = Rule
+        fields = ('id',
+                  'content_type',
+                  'name',
+                  'description',
+                  'conditions')

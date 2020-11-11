@@ -3,6 +3,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import IntegerField
 
+from mrs.rules.Actions import JobActions
+from mrs.rules.Variables import JobVariables
 from mrsauth.models import User
 
 
@@ -330,6 +332,10 @@ class Job(models.Model):
     class Meta:
         managed = True
         db_table = 'jobs'
+
+    class RulesConf:
+        variables = JobVariables
+        actions = JobActions
 
     def __str__(self):
         return self.name
@@ -692,12 +698,12 @@ class ContentTemplate(models.Model):
         return self.name
 
 
-class Rules(models.Model):
+class Rule(models.Model):
     id = models.AutoField(primary_key=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, db_column='contentTypeId', null=True)
     name = models.CharField(max_length=20)
     description = models.TextField(blank=True, null=True)
-    rules_set = models.JSONField()
+    conditions = models.JSONField()
 
     class Meta:
         managed = True
