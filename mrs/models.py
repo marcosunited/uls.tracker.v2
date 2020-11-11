@@ -654,6 +654,7 @@ class MrsOperator(models.Model):
     name = models.CharField(max_length=50)
     code = models.CharField(max_length=50)
     django_lookup = models.CharField(max_length=50)
+    rules_operator = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         managed = True
@@ -689,3 +690,22 @@ class ContentTemplate(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Rules(models.Model):
+    id = models.AutoField(primary_key=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, db_column='contentTypeId', null=True)
+    name = models.CharField(max_length=20)
+    description = models.TextField(blank=True, null=True)
+    rules_set = models.JSONField()
+
+    class Meta:
+        managed = True
+        db_table = 'rules'
+
+    def __str__(self):
+        return self.name
+
+
+# init models event receivers to enable rules engine
+from mrs.rules.EventReceivers import *

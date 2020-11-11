@@ -50,10 +50,6 @@ class MrsFieldSerializer(serializers.ModelSerializer):
                   'list_source_model')
 
 
-class MetaSerializer(serializers.Serializer):
-    fields = MrsFieldSerializer(read_only=True, many=True)
-
-
 class ModelMetaView(APIView):
     fields = []
 
