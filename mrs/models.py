@@ -700,14 +700,14 @@ class ContentTemplate(models.Model):
 
 class Rule(models.Model):
     id = models.AutoField(primary_key=True)
-    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, db_column='contentTypeId', null=True)
     name = models.CharField(max_length=20)
+    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, db_column='contentTypeId', null=True)
     description = models.TextField(blank=True, null=True)
     conditions = models.JSONField()
 
     class Meta:
         managed = True
-        db_table = 'rules'
+        db_table = 'business_rules'
 
     def __str__(self):
         return self.name

@@ -7,6 +7,7 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include, re_path
 
+from mrs.rules.RulesViewSet import RulesViewSet
 from mrs.rules.rules import RulesMetaView
 from mrs.utils.storage import FileView
 from mrs.utils.filter import QueryRouter, ModelMetaView
@@ -23,6 +24,8 @@ router.register(r'jobs', JobViewSet)
 router.register(r'rounds', RoundViewSet)
 router.register(r'agents', AgentViewSet)
 router.register(r'technicians', TechnicianViewSet)
+router.register(r'rules', RulesViewSet)
+
 
 """
 # dynamic views setup
