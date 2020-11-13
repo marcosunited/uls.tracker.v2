@@ -8,4 +8,4 @@ class JobActions(BaseActions):
 
     @rule_action(params={"contract_addition": FIELD_NUMERIC})
     def update_contract(self, contract_addition):
-        print('contract addition ' + contract_addition + str(self.job.id))
+        print('contract addition222 ' + contract_addition + str(self.job.id))
