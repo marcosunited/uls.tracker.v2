@@ -28,9 +28,12 @@ def getRules(content_type_id):
     return Rule.objects.filter(content_type_id=content_type_id)
 
 
-def runRules(sender, instance):
+def runModelRules(sender, instance):
     content_type = ContentType.objects.get(model=sender._meta.model_name)
     _rules = Rule.objects.filter(content_type_id=content_type.id)
+    if not _rules.exists():
+        raise RulesNotDefiniedError("Rules for model " + sender._meta.model_name + " not defined")
+
     rules = []
     rules_count = 0
     for rule in _rules:
@@ -49,6 +52,15 @@ def runRules(sender, instance):
             )
 
 
+def runRules(rule_id, variables, actions, data):
+    rule = Rule.objects.get(pk=rule_id)
+    run_all(rule_list=rule.conditions['rules'],
+            defined_variables=variables(data),
+            defined_actions=actions(data),
+            stop_on_first_trigger=True
+            )
+
+
 class RulesMetaView(APIView):
 
     def get(self, request, model):
@@ -61,3 +73,8 @@ class RulesMetaView(APIView):
         except AttributeError as e:
             response = ObjectResponse(error='Rules not configured for model ' + model)
         return Response(response.result, status=HTTP_200_OK)
+
+
+class RulesNotDefiniedError(RuntimeError):
+    def __init__(self, arg):
+        self.args = arg
