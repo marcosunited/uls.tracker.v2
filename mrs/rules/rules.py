@@ -1,3 +1,4 @@
+from auditlog.models import LogEntry
 from business_rules import export_rule_data, run_all
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
@@ -28,28 +29,36 @@ def getRules(content_type_id):
     return Rule.objects.filter(content_type_id=content_type_id)
 
 
-def runModelRules(sender, instance):
+def runModelRules(sender, instance, watched_fields):
     content_type = ContentType.objects.get(model=sender._meta.model_name)
-    _rules = Rule.objects.filter(content_type_id=content_type.id)
-    if not _rules.exists():
-        raise RulesNotDefiniedError("Rules for model " + sender._meta.model_name + " not defined")
+    log_entry = LogEntry.objects.filter(object_pk=instance.id,
+                                        content_type_id=content_type.id).latest('timestamp')
+    evaluate_rules = False
+    for field in watched_fields:
+        if field in log_entry.changes_dict:
+            evaluate_rules = True
 
-    rules = []
-    rules_count = 0
-    for rule in _rules:
-        try:
-            rules.append(rule.conditions['rules'][rules_count])
-            rules_count = rules_count + 1
-        except KeyError as e:
-            print(str(e))
-        except IndexError as e:
-            print(str(e))
+    if evaluate_rules:
+        _rules = Rule.objects.filter(content_type_id=content_type.id)
+        if not _rules.exists():
+            raise RulesNotDefiniedError("Rules for model " + sender._meta.model_name + " not defined")
 
-    run_all(rule_list=rules,
-            defined_variables=sender.RulesConf.variables(instance),
-            defined_actions=sender.RulesConf.actions(instance),
-            stop_on_first_trigger=True
-            )
+        rules = []
+        rules_count = 0
+        for rule in _rules:
+            try:
+                rules.append(rule.conditions['rules'][rules_count])
+                rules_count = rules_count + 1
+            except KeyError as e:
+                print(str(e))
+            except IndexError as e:
+                print(str(e))
+
+        run_all(rule_list=rules,
+                defined_variables=sender.RulesConf.variables(instance),
+                defined_actions=sender.RulesConf.actions(instance),
+                stop_on_first_trigger=True
+                )
 
 
 def runRules(rule_id, variables, actions, data):

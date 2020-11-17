@@ -76,6 +76,7 @@ class ProcessTypeStatus(models.Model):
     description = models.CharField(max_length=255)
     is_active = models.IntegerField(db_column='isActive')
     is_final = models.IntegerField(db_column='isFinal')
+    sequence_number = models.PositiveSmallIntegerField(default=1)
     process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
 
@@ -714,4 +715,4 @@ class Rule(models.Model):
 
 
 # init models event receivers to enable rules engine
-from mrs.rules.EventReceivers import *
+from mrs.rules.JobReceivers import *
