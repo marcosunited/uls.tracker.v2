@@ -75,7 +75,8 @@ class JobsSerializer(DynamicFieldsModelSerializer):
                   'project',
                   'agent',
                   'round',
-                  'lifts')
+                  'lifts',
+                  'notes')
 
 
 class TechniciansSerializer(serializers.ModelSerializer):

@@ -717,12 +717,13 @@ class Rule(models.Model):
 class ActionsHistory(models.Model):
     id = models.AutoField(primary_key=True)
     rule = models.JSONField()
+    variables = models.CharField(max_length=250, blank=True)
+    actions = models.CharField(max_length=250, blank=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, db_column='contentTypeId', null=True)
     object_id = models.PositiveIntegerField(null=True, blank=True)
     model_state = models.JSONField()
     timestamp = DateTimeField(auto_now_add=True, editable=False, null=False, blank=False)
-
-
+    hash = models.CharField(max_length=250, blank=True)
 
 
 # init models event receivers to enable rules engine

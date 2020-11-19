@@ -4,21 +4,20 @@ from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.dispatch import Signal
-from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
+from mrs.models import Rule, ActionsHistory
 from mrs.serializers import getDynamicSerializer
 from mrs.utils.response import ResponseHttp as ObjectResponse
-from mrs.models import Rule, ActionsHistory
 
 post_update = Signal()
 
 
 class RulesQuerySet(models.query.QuerySet):
     def update(self, kwargs):
-        super(RulesQuerySet, self).update(kwargs)
+        super(RulesQuerySet, self).update()
         post_update.send(sender=self.model)
 
 
@@ -43,7 +42,7 @@ def runModelRules(sender, instance, watched_fields):
     if evaluate_rules:
         _rules = Rule.objects.filter(content_type_id=content_type.id)
         if not _rules.exists():
-            raise RulesNotDefiniedError("Rules for model " + sender._meta.model_name + " not defined")
+            raise RulesNotDefinedError("Rules for model " + sender._meta.model_name + " not defined")
         # TODO: add entry to rule history, storage result of evaluation and result of associate action
         rules = []
         rules_count = 0
@@ -56,20 +55,29 @@ def runModelRules(sender, instance, watched_fields):
             except IndexError as e:
                 print(str(e))
 
-        rule_triggered = run_all(rule_list=rules,
-                                 defined_variables=sender.RulesConf.variables(instance),
-                                 defined_actions=sender.RulesConf.actions(instance),
-                                 stop_on_first_trigger=True
-                                 )
-        if rule_triggered:
-            serializer_class = getDynamicSerializer(sender)
-            serializer = serializer_class(instance)
-            json_instance = serializer.data
-            action_history = ActionsHistory(rule=rules,
-                                            content_type_id=content_type.id,
-                                            object_id=instance.id,
-                                            model_state=json_instance)
-            action_history.save()
+        serializer_class = getDynamicSerializer(sender)
+        serializer = serializer_class(instance)
+        json_instance = serializer.data
+
+        _hash = hash((str(rules), str(json_instance)))
+        action_history_entry = ActionsHistory.objects.filter(hash=_hash)
+
+        if not action_history_entry.exists():
+            rule_triggered = run_all(rule_list=rules,
+                                     defined_variables=sender.RulesConf.variables(instance),
+                                     defined_actions=sender.RulesConf.actions(instance),
+                                     stop_on_first_trigger=True
+                                     )
+            if rule_triggered:
+                action_history = ActionsHistory(rule=rules,
+                                                variables=sender.RulesConf.variables.__name__,
+                                                actions=sender.RulesConf.actions.__name__,
+                                                content_type_id=content_type.id,
+                                                object_id=instance.id,
+                                                model_state=json_instance,
+                                                hash=_hash)
+                action_history.save()
+
 
 def runRules(rule_id, variables, actions, data):
     rule = Rule.objects.get(pk=rule_id)
@@ -94,6 +102,6 @@ class RulesMetaView(APIView):
         return Response(response.result, status=HTTP_200_OK)
 
 
-class RulesNotDefiniedError(RuntimeError):
+class RulesNotDefinedError(RuntimeError):
     def __init__(self, arg):
         self.args = arg

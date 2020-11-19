@@ -1,5 +1,5 @@
 from django.apps import apps
-from django.db.models import Lookup
+from django.db.models import Lookup, CharField, TextField
 from django.db.models.fields import Field
 
 from rest_framework import serializers
@@ -14,6 +14,22 @@ from mrs.utils.cache import CachedModelViewSet
 from mrs.utils.response import ResponseHttp as ObjectResponse
 
 
+class Search(Lookup):
+    lookup_name = 'search'
+
+    def as_mysql(self, qn, connection):
+        lhs, lhs_params = self.process_lhs(qn, connection)
+        rhs, rhs_params = self.process_rhs(qn, connection)
+        params = lhs_params + rhs_params
+        # MySql specific implementation of full text search
+        # TODO: dynamically add FULLTEXT index for all text fields in mysql db
+        return 'MATCH (%s) AGAINST (%s IN BOOLEAN MODE)' % (lhs, rhs), params
+
+
+CharField.register_lookup(Search)
+TextField.register_lookup(Search)
+
+
 class NotEqual(Lookup):
     lookup_name = 'ne'
 
@@ -24,8 +40,6 @@ class NotEqual(Lookup):
         return '%s <> %s' % (lhs, rhs), params
 
 
-# register ne (not equal) lookup to filter
-# use: results = Model.objects.exclude(a=True, x__ne=5)
 Field.register_lookup(NotEqual)
 
 
