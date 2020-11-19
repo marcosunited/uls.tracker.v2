@@ -1,3 +1,4 @@
+from django_filters.utils import get_all_model_fields
 from rest_framework import serializers
 from rest_framework.relations import PrimaryKeyRelatedField
 
@@ -125,3 +126,15 @@ class RulesSerializer(serializers.ModelSerializer):
                   'name',
                   'description',
                   'conditions')
+
+
+def getDynamicSerializer(model):
+    return type(model.__name__ + 'DynamicSerializer',
+                (serializers.ModelSerializer,),
+                {'Meta':
+                     type('Meta', (object,), {
+                         'model': model,
+                         'fields': get_all_model_fields(
+                             model)
+                     })
+                 })

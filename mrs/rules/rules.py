@@ -4,12 +4,14 @@ from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.dispatch import Signal
+from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
+from mrs.serializers import getDynamicSerializer
 from mrs.utils.response import ResponseHttp as ObjectResponse
-from mrs.models import Rule
+from mrs.models import Rule, ActionsHistory
 
 post_update = Signal()
 
@@ -42,7 +44,7 @@ def runModelRules(sender, instance, watched_fields):
         _rules = Rule.objects.filter(content_type_id=content_type.id)
         if not _rules.exists():
             raise RulesNotDefiniedError("Rules for model " + sender._meta.model_name + " not defined")
-
+        # TODO: add entry to rule history, storage result of evaluation and result of associate action
         rules = []
         rules_count = 0
         for rule in _rules:
@@ -54,12 +56,20 @@ def runModelRules(sender, instance, watched_fields):
             except IndexError as e:
                 print(str(e))
 
-        run_all(rule_list=rules,
-                defined_variables=sender.RulesConf.variables(instance),
-                defined_actions=sender.RulesConf.actions(instance),
-                stop_on_first_trigger=True
-                )
-
+        rule_triggered = run_all(rule_list=rules,
+                                 defined_variables=sender.RulesConf.variables(instance),
+                                 defined_actions=sender.RulesConf.actions(instance),
+                                 stop_on_first_trigger=True
+                                 )
+        if rule_triggered:
+            serializer_class = getDynamicSerializer(sender)
+            serializer = serializer_class(instance)
+            json_instance = serializer.data
+            action_history = ActionsHistory(rule=rules,
+                                            content_type_id=content_type.id,
+                                            object_id=instance.id,
+                                            model_state=json_instance)
+            action_history.save()
 
 def runRules(rule_id, variables, actions, data):
     rule = Rule.objects.get(pk=rule_id)

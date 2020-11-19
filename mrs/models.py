@@ -1,7 +1,7 @@
 # UNITED LIFTS MRS BASE MODEL
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import IntegerField
+from django.db.models import IntegerField, DateTimeField, BooleanField
 
 from mrs.rules.Actions import JobActions
 from mrs.rules.Variables import JobVariables
@@ -712,6 +712,17 @@ class Rule(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ActionsHistory(models.Model):
+    id = models.AutoField(primary_key=True)
+    rule = models.JSONField()
+    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, db_column='contentTypeId', null=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    model_state = models.JSONField()
+    timestamp = DateTimeField(auto_now_add=True, editable=False, null=False, blank=False)
+
+
 
 
 # init models event receivers to enable rules engine
