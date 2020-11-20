@@ -705,6 +705,7 @@ class Rule(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, db_column='contentTypeId', null=True)
     description = models.TextField(blank=True, null=True)
     conditions = models.JSONField()
+    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
 
     class Meta:
         managed = True
@@ -724,6 +725,7 @@ class ActionsHistory(models.Model):
     model_state = models.JSONField()
     timestamp = DateTimeField(auto_now_add=True, editable=False, null=False, blank=False)
     hash = models.CharField(max_length=250, blank=True)
+    executed = models.BooleanField(blank=True, null=True)
 
 
 # init models event receivers to enable rules engine

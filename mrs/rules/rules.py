@@ -32,12 +32,13 @@ def getRules(content_type_id):
 
 def runModelRules(sender, instance, watched_fields):
     content_type = ContentType.objects.get(model=sender._meta.model_name)
-    log_entry = LogEntry.objects.filter(object_pk=instance.id,
-                                        content_type_id=content_type.id).latest('timestamp')
+    history_entry = ActionsHistory.objects.filter(object_id=instance.id,
+                                                  content_type_id=content_type.id).latest('timestamp')
     evaluate_rules = False
     for field in watched_fields:
-        if field in log_entry.changes_dict:
-            evaluate_rules = True
+        if field in history_entry.model_state:
+            if getattr(instance, field) != history_entry.model_state.get(field):
+                evaluate_rules = True
 
     if evaluate_rules:
         _rules = Rule.objects.filter(content_type_id=content_type.id)
@@ -60,7 +61,7 @@ def runModelRules(sender, instance, watched_fields):
         json_instance = serializer.data
 
         _hash = hash((str(rules), str(json_instance)))
-        action_history_entry = ActionsHistory.objects.filter(hash=_hash)
+        action_history_entry = ActionsHistory.objects.filter(hash=_hash, executed=False)
 
         if not action_history_entry.exists():
             rule_triggered = run_all(rule_list=rules,
@@ -75,7 +76,8 @@ def runModelRules(sender, instance, watched_fields):
                                                 content_type_id=content_type.id,
                                                 object_id=instance.id,
                                                 model_state=json_instance,
-                                                hash=_hash)
+                                                hash=_hash,
+                                                executed=True)
                 action_history.save()
 
 
