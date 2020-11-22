@@ -54,9 +54,9 @@ class UserDetail(APIView):
     @method_decorator(cache_page(60 * 60 * 2))
     def get(self, request, pk):
         try:
-            item = User.objects.get(pk=pk)
-            item_serializer = UsersSerializer(item)
-            return JsonResponse({'result': item_serializer.data, 'error': ''}, status=HTTP_200_OK)
+            user = User.objects.get(pk=pk)
+            user_serializer = UsersSerializer(user)
+            return JsonResponse({'result': user_serializer.data, 'error': ''}, status=HTTP_200_OK)
 
         except User.DoesNotExist:
             result = ResponseHttp(error='The user does not exist').result
@@ -66,16 +66,16 @@ class UserDetail(APIView):
 
     def put(self, request, pk):
         try:
-            item = User.objects.get(pk=pk)
-            item_data = JSONParser().parse(request)
-            item_serializer = UsersSerializer(
-                item, data=item_data, partial=True)
+            user = User.objects.get(pk=pk)
+            user_data = JSONParser().parse(request)
+            user_serializer = UsersSerializer(
+                user, data=user_data, partial=True)
 
-            if item_serializer.is_valid():
-                item_serializer.save()
-                return JsonResponse({'result': item_serializer.data, 'error': ''})
+            if user_serializer.is_valid():
+                user_serializer.save()
+                return JsonResponse({'result': user_serializer.data, 'error': ''})
 
-            return JsonResponse(item_serializer.errors, status=HTTP_400_BAD_REQUEST)
+            return JsonResponse(user_serializer.errors, status=HTTP_400_BAD_REQUEST)
 
         except User.DoesNotExist:
             result = ResponseHttp(error='The user does not exist').result
@@ -85,8 +85,8 @@ class UserDetail(APIView):
 
     def delete(self, request, pk):
         try:
-            item = User.objects.get(pk=pk)
-            item.delete()
+            user = User.objects.get(pk=pk)
+            user.delete()
             return JsonResponse('User was deleted successfully', safe=False, status=HTTP_204_NO_CONTENT)
 
         except User.DoesNotExist:

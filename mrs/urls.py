@@ -12,7 +12,7 @@ from mrs.rules.rules import RulesMetaView
 from mrs.utils.storage import FileView
 from mrs.utils.filter import QueryRouter, ModelMetaView
 
-from mrs.views.ProjectViewSets import *
+from mrs.views.BusinessViewSets import *
 
 router = QueryRouter()
 

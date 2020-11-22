@@ -76,7 +76,9 @@ class JobsSerializer(DynamicFieldsModelSerializer):
                   'agent',
                   'round',
                   'lifts',
-                  'notes')
+                  'notes',
+                  'suburb',
+                  'address')
 
 
 class TechniciansSerializer(serializers.ModelSerializer):
@@ -111,6 +113,45 @@ class AgentsSerializer(serializers.ModelSerializer):
                   'name',
                   'contact')
 
+
+class LiftsSerializer(serializers.ModelSerializer):
+    job = PrimaryKeyRelatedField(many=False, queryset=Job.objects.all())
+    brand = PrimaryKeyRelatedField(many=False, queryset=Brand.objects.all())
+
+    class Meta:
+        model = Lift
+        fields = ('id',
+                  'name',
+                  'phone',
+                  'job',
+                  'model',
+                  'is_active',
+                  'brand',
+                  'registration_number',
+                  'floor',
+                  'drive',
+                  'has_light_trays',
+                  'speed',
+                  'installed_date',
+                  'status')
+
+class CorrectionsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Correction
+        fields = ('id',
+                  'name',
+                  'description',
+                  'service_target_id')
+
+
+class FaultsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Fault
+        fields = ('id',
+                  'name',
+                  'description')
 
 """
 SYSTEM SERIALIZERS

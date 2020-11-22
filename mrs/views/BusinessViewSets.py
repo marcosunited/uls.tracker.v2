@@ -32,8 +32,6 @@ class RoundViewSet(FilteredModelViewSet):
     serializer_class = RoundsSerializer
 
 
-
-
 class AgentViewSet(FilteredModelViewSet):
     queryset = Agent.objects.all()
     serializer_class = AgentsSerializer
@@ -43,3 +41,17 @@ class TechnicianViewSet(FilteredModelViewSet):
     queryset = Technician.objects.all()
     serializer_class = TechniciansSerializer
 
+
+class LiftViewSet(FilteredModelViewSet):
+    queryset = Lift.objects.all()
+    serializer_class = LiftsSerializer
+
+
+class CorrectionViewSet(FilteredModelViewSet):
+    queryset = Correction.objects.all()
+    serializer_class = CorrectionsSerializer
+
+
+class FaultViewSet(FilteredModelViewSet):
+    queryset = Fault.objects.all()
+    serializer_class = FaultsSerializer
