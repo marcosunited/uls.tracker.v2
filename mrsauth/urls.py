@@ -20,6 +20,9 @@ urlpatterns = [
     url(r'^api/v1/user/(?P<pk>[0-9]+)$', UserViewSet.UserDetail.as_view()),
     url(r'^api/v1/user/filter$', UserViewSet.UserFilter.as_view()),
 
+    # Group - User
+    url(r'^api/v1/group/(?P<pk_group>[0-9]+)/user/(?P<pk_user>[0-9]+)$', UserViewSet.GroupUserRelationView.as_view()),
+
     # Authentication-authorization router managed urls
     url(r'^api/v1/', include(router.urls)),
 

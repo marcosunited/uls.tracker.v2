@@ -42,7 +42,7 @@ class ContractsSerializer(serializers.ModelSerializer):
     contact = PrimaryKeyRelatedField(many=False, queryset=Contact.objects.all())
 
     class Meta:
-        model = Job
+        model = Contract
         fields = ('id',
                   'name',
                   'is_active',
@@ -92,7 +92,7 @@ class TechniciansSerializer(serializers.ModelSerializer):
 
 
 class RoundsSerializer(serializers.ModelSerializer):
-    technicians = TechniciansSerializer(read_only=True, many=True)
+    technicians = TechniciansSerializer(many=True)
 
     class Meta:
         model = Round

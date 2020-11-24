@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Group
 from django.http.response import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -8,7 +9,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 
 from ..models import User
-from ..serializers import UsersSerializer
+from ..serializers import UsersSerializer, GroupsSerializer
 from mrs.utils.response import ResponseHttp
 
 from rest_framework.status import (
@@ -71,6 +72,16 @@ class UserDetail(APIView):
             user_serializer = UsersSerializer(
                 user, data=user_data, partial=True)
 
+            if 'add_to' in user_data:
+                for _group in user_data["add_to"]:
+                    group = Group.objects.get(name=_group)
+                    group.user_set.add(user.id)
+
+            if 'remove_from' in user_data:
+                for _group in user_data["remove_from"]:
+                    group = Group.objects.get(name=_group)
+                    group.user_set.remove(user.id)
+
             if user_serializer.is_valid():
                 user_serializer.save()
                 return JsonResponse({'result': user_serializer.data, 'error': ''})
@@ -110,5 +121,29 @@ class UserFilter(APIView):
 
         except User.DoesNotExist:
             return JsonResponse(ResponseHttp(error='The item does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class GroupUserRelationView(APIView):
+    def post(self, request, pk_group, pk_user):
+        try:
+            group = Group.objects.get(id=pk_group)
+            group.user_set.add(pk_user)
+            group_serializer = GroupsSerializer(group)
+            return JsonResponse({'result': group_serializer.data, 'error': ''})
+        except Group.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The group does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, pk_group, pk_user):
+        try:
+            group = Group.objects.get(id=pk_group)
+            group.user_set.remove(pk_user)
+            group_serializer = GroupsSerializer(group)
+            return JsonResponse({'result': group_serializer.data, 'error': ''})
+        except Group.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The group does not exist').result, status=HTTP_404_NOT_FOUND)
         except Exception as error:
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)

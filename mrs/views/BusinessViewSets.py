@@ -1,5 +1,11 @@
+from django.http import JsonResponse
+from rest_framework.parsers import JSONParser
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
+from rest_framework.views import APIView
+
 from mrs.serializers import *
 from mrs.utils.filter import FilteredModelViewSet
+from mrs.utils.response import ResponseHttp
 
 
 class ProjectViewSet(FilteredModelViewSet):
@@ -30,6 +36,37 @@ class JobViewSet(FilteredModelViewSet):
 class RoundViewSet(FilteredModelViewSet):
     queryset = Round.objects.all()
     serializer_class = RoundsSerializer
+
+
+# /rounds/idRound/addTech/idTec/
+class RoundTechnicianRelationView(APIView):
+    def post(self, request, pk_round, pk_technician):
+        try:
+            round = Round.objects.get(id=pk_round)
+            technician = Technician.objects.get(id=pk_technician)
+            round.technicians.add(technician.id)
+            round_serializer = RoundsSerializer(round)
+            return JsonResponse({'result': round_serializer.data, 'error': ''})
+        except Round.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The round does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Technician.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The technician does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, pk_round, pk_technician):
+        try:
+            round = Round.objects.get(id=pk_round)
+            technician = Technician.objects.get(id=pk_technician)
+            round.technicians.remove(technician.id)
+            round_serializer = RoundsSerializer(round)
+            return JsonResponse({'result': round_serializer.data, 'error': ''})
+        except Round.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The round does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Technician.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The technician does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class AgentViewSet(FilteredModelViewSet):

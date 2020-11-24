@@ -229,16 +229,16 @@ class ContractFrequency(models.Model):
 class Contract(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50, blank=True, null=True)
-    is_active = models.IntegerField(db_column='isActive')
+    is_active = models.IntegerField(db_column='isActive', blank=True, null=True)
     start_datetime = models.DateTimeField(db_column='startDatetime', blank=True, null=True)
     end_datetime = models.DateTimeField(db_column='endDatetime', blank=True, null=True)
     stand_by_datetime = models.DateTimeField(db_column='standByDatetime', blank=True, null=True)
     reactive_datetime = models.DateTimeField(db_column='reactiveDatetime', blank=True, null=True)
     cancel_datetime = models.CharField(db_column='cancelDatetime', max_length=255, blank=True, null=True)
     price = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True)
-    frequency_mtn_id = models.IntegerField(db_column='frequencyMtnId', unique=True)
-    contact = models.OneToOneField(Contact, on_delete=models.CASCADE)
-    contract_frequency = models.OneToOneField(ContractFrequency, on_delete=models.CASCADE)
+    frequency_mtn_id = models.IntegerField(db_column='frequencyMtnId', unique=True, blank=True, null=True)
+    contact = models.OneToOneField(Contact, on_delete=models.CASCADE, blank=True, null=True)
+    contract_frequency = models.OneToOneField(ContractFrequency, on_delete=models.CASCADE, blank=True, null=True)
     notes = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
@@ -356,7 +356,7 @@ class Lift(models.Model):
     has_light_trays = models.IntegerField(db_column='hasLightRays')
     speed = models.IntegerField(blank=True, null=True)
     installed_date = models.DateTimeField(db_column='installedDate', blank=True, null=True)
-    status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId')
+    status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', blank=True, null=True)
 
     class Meta:
         managed = True
@@ -377,7 +377,7 @@ class ServicesTypes(models.Model):
 class Settings(models.Model):
     id = models.AutoField(primary_key=True)
     module = models.CharField(max_length=20)
-    code = models.CharField(max_length=3)
+    key = models.CharField(max_length=3)
     description = models.CharField(max_length=255, blank=True, null=True)
     value = models.CharField(max_length=255)
     value1 = models.CharField(max_length=255, blank=True, null=True)
@@ -705,7 +705,7 @@ class Rule(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, db_column='contentTypeId', null=True)
     description = models.TextField(blank=True, null=True)
     conditions = models.JSONField()
-    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
+    #project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId', blank=True, null=True)
 
     class Meta:
         managed = True
