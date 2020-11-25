@@ -8,6 +8,26 @@ from mrs.rules.Variables import JobVariables
 from mrsauth.models import User
 
 
+class ServiceArea(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+
+    class Meta:
+        managed = True
+        db_table = 'service_area'
+        app_label = 'mrs'
+
+
+class ServiceType(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+
+    class Meta:
+        managed = True
+        db_table = 'service_type'
+        app_label = 'mrs'
+
+
 class ServiceTarget(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
@@ -17,6 +37,28 @@ class ServiceTarget(models.Model):
         managed = True
         db_table = 'services_targets'
         app_label = 'mrs'
+
+
+class Task(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    description = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'tasks'
+
+
+class Procedure(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    tasks = models.ManyToManyField(Task)
+    service_target = models.ForeignKey(ServiceTarget, on_delete=models.DO_NOTHING, db_column='serviceTargetId')
+
+    class Meta:
+        managed = True
+        db_table = 'procedures'
 
 
 class Month(models.Model):
@@ -122,8 +164,14 @@ class Profile(models.Model):
 
 
 class Contact(models.Model):
+    TITLE_CHOICES = (
+        ('Sr', 'Sr'),
+        ('Mrs', 'Mrs'),
+        ('Ing', 'Ing'),
+    )
+
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=50, choices=TITLE_CHOICES)
     position = models.CharField(max_length=50)
     first_name = models.CharField(max_length=70)
     last_name = models.CharField(max_length=70)
@@ -229,7 +277,7 @@ class ContractFrequency(models.Model):
 class Contract(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50, blank=True, null=True)
-    is_active = models.IntegerField(db_column='isActive', blank=True, null=True)
+    is_active = models.BooleanField(db_column='isActive', blank=True, null=True)
     start_datetime = models.DateTimeField(db_column='startDatetime', blank=True, null=True)
     end_datetime = models.DateTimeField(db_column='endDatetime', blank=True, null=True)
     stand_by_datetime = models.DateTimeField(db_column='standByDatetime', blank=True, null=True)
@@ -240,6 +288,7 @@ class Contract(models.Model):
     contact = models.OneToOneField(Contact, on_delete=models.CASCADE, blank=True, null=True)
     contract_frequency = models.OneToOneField(ContractFrequency, on_delete=models.CASCADE, blank=True, null=True)
     notes = models.CharField(max_length=255, blank=True, null=True)
+    status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', default='1')
 
     class Meta:
         managed = True
@@ -318,17 +367,17 @@ class Job(models.Model):
     contact = models.OneToOneField(Contact, on_delete=models.DO_NOTHING, verbose_name='Contact')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
     contract = models.OneToOneField(Contract, on_delete=models.CASCADE)
-    agent = models.OneToOneField(Agent, on_delete=models.DO_NOTHING)
+    agent = models.ForeignKey(Agent, on_delete=models.DO_NOTHING)
     round = models.ForeignKey(Round, on_delete=models.DO_NOTHING, db_column='roundId')
     floors = models.CharField(max_length=255, blank=True, null=True)
     postcode = models.CharField(db_column='postCode', max_length=12, blank=True, null=True)
-    contact = models.OneToOneField(Contact, on_delete=models.CASCADE)
     key_access_details = models.CharField(db_column='keyAccessDetails', max_length=255, blank=True, null=True)
     notes = models.CharField(max_length=4000, blank=True, null=True)
     position = models.TextField(blank=True, null=True)
     address = models.CharField(db_column='address', max_length=100, blank=True, null=True)
-    suburb = models.CharField(db_column='suburb', max_length=50, blank=True, null=True)
-    lifts = models.IntegerField()
+    suburb = models.CharField(db_column='suburb', max_length=100, blank=True, null=True)
+    group = models.CharField(db_column='group', max_length=100, blank=True, null=True)
+    owner_details = models.CharField(db_column='ownerDetails', max_length=250, blank=True, null=True)
 
     class Meta:
         managed = True
@@ -356,7 +405,8 @@ class Lift(models.Model):
     has_light_trays = models.IntegerField(db_column='hasLightRays')
     speed = models.IntegerField(blank=True, null=True)
     installed_date = models.DateTimeField(db_column='installedDate', blank=True, null=True)
-    status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', blank=True, null=True)
+    status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', blank=True,
+                               null=True)
 
     class Meta:
         managed = True
@@ -466,11 +516,11 @@ class Workorder(models.Model):
     reported_fault = models.ForeignKey(Fault, on_delete=models.DO_NOTHING, db_column='reportedFaultId', blank=True,
                                        null=True)
     detected_fault = models.IntegerField(db_column='detectedFaultId', blank=True, null=True)
-    lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
+    # lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
     subject = models.CharField(max_length=255, blank=True, null=True)
-    description = models.CharField(max_length=32000, blank=True, null=True)
+    description = models.TextField(max_length=32000, blank=True, null=True)
     correction = models.ForeignKey(Correction, models.DO_NOTHING, db_column='correctionId')
-    solution = models.CharField(max_length=32000, blank=True, null=True)
+    solution = models.TextField(max_length=32000, blank=True, null=True)
     signature = models.IntegerField(db_column='signatureId', blank=True, null=True)
     attention_time = models.IntegerField(db_column='attentionTime', blank=True, null=True)
     solution_time = models.IntegerField(db_column='solutionTime', blank=True, null=True)
@@ -521,12 +571,33 @@ class ClosedWorkorder(models.Model):
         db_table = 'closed_workorders'
 
 
+class Maintenance(models.Model):
+    id = models.AutoField(primary_key=True)
+    service_area = models.ForeignKey(ServiceArea, on_delete=models.DO_NOTHING, db_column='serviceAreaId')
+    service_type = models.ForeignKey(ServiceTarget, on_delete=models.DO_NOTHING, db_column='serviceTypeId')
+    procedure = models.ManyToManyField(Procedure)  # procedure replace the list of Task in old model
+    completed_id = models.IntegerField(db_column='completedId', blank=True, null=True)
+    time_of_arrival = models.DateTimeField(db_column='timeArrival', blank=True, null=True)
+    time_of_depart = models.DateTimeField(db_column='timeDepart', blank=True, null=True)
+    docket_number = models.IntegerField(db_column='docketNumber', blank=True, null=True)
+    workorder = models.OneToOneField(Workorder, on_delete=models.DO_NOTHING, db_column='workorderId', default='1')
+    technician_signature = models.ImageField(db_column='technicianSignature', max_length=255, blank=True, null=True,
+                                             upload_to='images/signature')
+    customer_signature = models.ImageField(db_column='customerSignature', max_length=255, blank=True, null=True,
+                                           upload_to='images/signature')
+
+    class Meta:
+        managed = True
+        db_table = 'maintenances'
+
 class Callout(models.Model):
     id = models.AutoField(primary_key=True)
     is_printed = models.IntegerField(db_column='isPrinted', blank=True, null=True)
-    technician_fault = models.ForeignKey(Fault, on_delete=models.DO_NOTHING, db_column='technicianFaultId', default='1')
+    fault = models.ForeignKey(Fault, on_delete=models.DO_NOTHING, db_column='faultId', default='1')
+    technician_fault = models.ForeignKey(Fault, on_delete=models.DO_NOTHING, db_column='technicianFaultId',
+                                         related_name='technician_retedted_fault', default='1')
     priority = models.ForeignKey(Priority, on_delete=models.DO_NOTHING, db_column='priorityId', blank=True, null=True)
-    florNumber = models.CharField(db_column='floorNo', max_length=255, blank=True, null=True)
+    floor_number = models.CharField(db_column='floorNo', max_length=255, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
     part_description = models.CharField(db_column='partDescription', max_length=255, blank=True, null=True)
     correction = models.ForeignKey(Correction, models.DO_NOTHING, db_column='correctionId')
@@ -606,28 +677,6 @@ class WorkorderPosition(models.Model):
         db_table = 'workorders_positions'
 
 
-class Task(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255)
-    description = models.CharField(max_length=255, blank=True, null=True)
-
-    class Meta:
-        managed = True
-        db_table = 'tasks'
-
-
-class Procedure(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=50)
-    description = models.CharField(max_length=255, blank=True, null=True)
-    tasks = models.ManyToManyField(Task)
-    service_target = models.ForeignKey(ServiceTarget, on_delete=models.DO_NOTHING, db_column='serviceTargetId')
-
-    class Meta:
-        managed = True
-        db_table = 'procedures'
-
-
 class MaintenancePlan(models.Model):
     id = models.AutoField(primary_key=True)
     lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
@@ -705,7 +754,8 @@ class Rule(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, db_column='contentTypeId', null=True)
     description = models.TextField(blank=True, null=True)
     conditions = models.JSONField()
-    #project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId', blank=True, null=True)
+
+    # project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId', blank=True, null=True)
 
     class Meta:
         managed = True

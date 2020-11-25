@@ -23,7 +23,7 @@ class ContactsSerializer(serializers.ModelSerializer):
                   'title',
                   'position',
                   'first_name',
-                  'last_name)',
+                  'last_name',
                   'phone_number',
                   'mobile_number',
                   'email',
@@ -58,12 +58,45 @@ class ContractsSerializer(serializers.ModelSerializer):
                   'notes')
 
 
+class LiftsSerializer(serializers.ModelSerializer):
+    job = PrimaryKeyRelatedField(many=False, queryset=Job.objects.all())
+    brand = PrimaryKeyRelatedField(many=False, queryset=Brand.objects.all())
+
+    class Meta:
+        model = Lift
+        fields = ('id',
+                  'name',
+                  'phone',
+                  'job',
+                  'model',
+                  'is_active',
+                  'brand',
+                  'registration_number',
+                  'floor',
+                  'drive',
+                  'has_light_trays',
+                  'speed',
+                  'installed_date',
+                  'status')
+
+
+class AgentsSerializer(serializers.ModelSerializer):
+    contact = ContactsSerializer(many=False)
+
+    class Meta:
+        model = Agent
+        fields = ('id',
+                  'name',
+                  'contact')
+
+
 class JobsSerializer(DynamicFieldsModelSerializer):
     contract = PrimaryKeyRelatedField(many=False, queryset=Contract.objects.all())
     contact = PrimaryKeyRelatedField(many=False, queryset=Contact.objects.all())
     project = PrimaryKeyRelatedField(many=False, queryset=Project.objects.all())
-    agent = PrimaryKeyRelatedField(many=False, queryset=Agent.objects.all())
+    agent = AgentsSerializer(many=False)
     round = PrimaryKeyRelatedField(many=False, queryset=Round.objects.all())
+    lifts = LiftsSerializer(many=True, read_only=True, source='lift_set')
 
     class Meta:
         model = Job
@@ -104,39 +137,10 @@ class RoundsSerializer(serializers.ModelSerializer):
                   'technicians')
 
 
-class AgentsSerializer(serializers.ModelSerializer):
-    contact = PrimaryKeyRelatedField(many=False, queryset=Contact.objects.all())
-
-    class Meta:
-        model = Agent
-        fields = ('id',
-                  'name',
-                  'contact')
 
 
-class LiftsSerializer(serializers.ModelSerializer):
-    job = PrimaryKeyRelatedField(many=False, queryset=Job.objects.all())
-    brand = PrimaryKeyRelatedField(many=False, queryset=Brand.objects.all())
-
-    class Meta:
-        model = Lift
-        fields = ('id',
-                  'name',
-                  'phone',
-                  'job',
-                  'model',
-                  'is_active',
-                  'brand',
-                  'registration_number',
-                  'floor',
-                  'drive',
-                  'has_light_trays',
-                  'speed',
-                  'installed_date',
-                  'status')
 
 class CorrectionsSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Correction
         fields = ('id',
@@ -146,12 +150,32 @@ class CorrectionsSerializer(serializers.ModelSerializer):
 
 
 class FaultsSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Fault
         fields = ('id',
                   'name',
                   'description')
+
+
+class TasksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Fault
+        fields = ('id',
+                  'name',
+                  'description')
+
+
+class ProceduresSerializer(serializers.ModelSerializer):
+    tasks = TasksSerializer(many=True)
+
+    class Meta:
+        model = Fault
+        fields = ('id',
+                  'name',
+                  'description',
+                  'tasks',
+                  'service_target')
+
 
 """
 SYSTEM SERIALIZERS

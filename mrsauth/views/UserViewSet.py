@@ -3,9 +3,12 @@ from django.http.response import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.db.models import Q
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, permission_classes
 
 from rest_framework.parsers import JSONParser
-from rest_framework import status
+from rest_framework import status, permissions
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 
 from ..models import User
@@ -37,9 +40,9 @@ class UserList(APIView):
 
 
 class UserInit(APIView):
+    permission_classes = [permissions.AllowAny]
 
     # Create new user
-
     def post(self, request):
         user_data = JSONParser().parse(request)
         user_serializer = UsersSerializer(data=user_data)

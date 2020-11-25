@@ -30,8 +30,12 @@ router.register(r'lifts', LiftViewSet)
 router.register(r'rules', RulesViewSet)
 
 urlpatterns = [
+    # Django admin urls
     path('admin/', admin.site.urls),
+
+    # auth app urls
     url(r'^', include('mrsauth.urls')),
+
     url(r'^api/v1/meta/(?P<model>\D+)/', ModelMetaView.as_view()),
     url(r'^api/v1/rules/meta/(?P<model>\D+)/', RulesMetaView.as_view()),
     url(r'^api/v1/upload/$', FileView.as_view(), name='file-upload'),
@@ -40,5 +44,4 @@ urlpatterns = [
     # rounds - technicians
     url(r'^api/v1/rounds/(?P<pk_round>[0-9]+)/technician/(?P<pk_technician>[0-9]+)$',
         BusinessViewSets.RoundTechnicianRelationView.as_view()),
-
 ]
