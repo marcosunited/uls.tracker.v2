@@ -44,4 +44,9 @@ urlpatterns = [
     # rounds - technicians
     url(r'^api/v1/rounds/(?P<pk_round>[0-9]+)/technician/(?P<pk_technician>[0-9]+)$',
         BusinessViewSets.RoundTechnicianRelationView.as_view()),
+
+    # technicians - jobs
+    url(r'^api/v1/technicians/(?P<pk_technician>[0-9]+)/getJobs$',
+        BusinessViewSets.TechnicianJobsRelationView.as_view()),
+
 ]

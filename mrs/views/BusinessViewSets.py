@@ -79,6 +79,24 @@ class TechnicianViewSet(FilteredModelViewSet):
     serializer_class = TechniciansSerializer
 
 
+# /technicians/idTechnician/getJobs
+class TechnicianJobsRelationView(APIView):
+    def get(self, request, pk_technician):
+        try:
+            technician = Technician.objects.get(id=pk_technician)
+            rounds = technician.round_set.all()
+            jobs = []
+            for _round in rounds:
+                _jobs = _round.job_set.all()
+                for job in _jobs:
+                    jobs.append(JobsSerializer(job).data)
+            return JsonResponse({'result': jobs, 'error': ''})
+        except Technician.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The technician does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class LiftViewSet(FilteredModelViewSet):
     queryset = Lift.objects.all()
     serializer_class = LiftsSerializer

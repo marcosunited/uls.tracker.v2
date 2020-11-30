@@ -1,6 +1,7 @@
 import os
 import time
 
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.storage import FileSystemStorage
 from django.db import models
@@ -25,11 +26,10 @@ def get_upload_path(instance, filename):
 
 class FileDocument(models.Model):
     id = models.AutoField(primary_key=True)
-    document_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, db_column='contentTypeId', blank=True,
-                                      null=True)
-    document_id = models.PositiveIntegerField(blank=True, null=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING,
+                                     db_column='contentTypeId', blank=True, null=True)
+    object_id = GenericForeignKey('content_type', 'object_id')
     file_sequence = models.PositiveIntegerField(blank=True, null=True)
-    file_path = models.FilePathField(path=None)
     is_upload = models.BooleanField(blank=True, null=True)
     file = FileField(upload_to=get_upload_path, storage=FileSystemStorage(location='c:\\upload'))
 
