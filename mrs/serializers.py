@@ -89,6 +89,23 @@ class AgentsSerializer(serializers.ModelSerializer):
                   'name',
                   'contact')
 
+class CalloutsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Callout
+        fields = ('__all__')
+
+class MaintenancesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Maintenance
+        fields = ('__all__')
+
+class RepairsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Repair
+        fields = ('__all__')
 
 class JobsSerializer(DynamicFieldsModelSerializer):
     contract = PrimaryKeyRelatedField(many=False, queryset=Contract.objects.all())
@@ -121,7 +138,7 @@ class TechniciansSerializer(serializers.ModelSerializer):
         model = Technician
         fields = ('id',
                   'profile',
-                  'notes')
+                  'notes',)
 
 
 class RoundsSerializer(serializers.ModelSerializer):
@@ -176,6 +193,11 @@ class ProceduresSerializer(serializers.ModelSerializer):
                   'tasks',
                   'service_target')
 
+class NotesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Note
+        fields = ('__all__')
 
 """
 SYSTEM SERIALIZERS
@@ -204,3 +226,4 @@ def getDynamicSerializer(model):
                              model)
                      })
                  })
+

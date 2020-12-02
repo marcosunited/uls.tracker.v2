@@ -45,11 +45,16 @@ class UserInit(APIView):
     # Create new user
     def post(self, request):
         user_data = JSONParser().parse(request)
+        user_data["nick_name"] = user_data["email"]
         user_serializer = UsersSerializer(data=user_data)
 
         if user_serializer.is_valid():
             user_serializer.save()
-            return JsonResponse(user_serializer.data, status=status.HTTP_201_CREATED)
+            r = user_serializer.validated_data
+            r["email"] = r["nick_name"]
+            r.pop("nick_name")
+
+            return JsonResponse(r, status=status.HTTP_201_CREATED)
         return JsonResponse(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -60,7 +65,10 @@ class UserDetail(APIView):
         try:
             user = User.objects.get(pk=pk)
             user_serializer = UsersSerializer(user)
-            return JsonResponse({'result': user_serializer.data, 'error': ''}, status=HTTP_200_OK)
+            r = user_serializer.validated_data
+            r["email"] = r["nick_name"]
+            r.pop("nick_name")
+            return JsonResponse({'result': r, 'error': ''}, status=HTTP_200_OK)
 
         except User.DoesNotExist:
             result = ResponseHttp(error='The user does not exist').result
@@ -87,7 +95,13 @@ class UserDetail(APIView):
 
             if user_serializer.is_valid():
                 user_serializer.save()
-                return JsonResponse({'result': user_serializer.data, 'error': ''})
+
+                r = user_serializer.validated_data
+                r["email"] = r["nick_name"]
+                r.pop("nick_name")
+
+                return JsonResponse({'result': r, 'error': ''})
+
 
             return JsonResponse(user_serializer.errors, status=HTTP_400_BAD_REQUEST)
 

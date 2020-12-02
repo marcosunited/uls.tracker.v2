@@ -11,11 +11,12 @@ from mrs.utils.storage import FileDocument, get_upload_path
 from mrsauth.models import User
 
 
-class Notes(models.Model):
+class Note(models.Model):
     id = models.AutoField(primary_key=True)
-    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING,
+    document_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING,
                                      db_column='contentTypeId', blank=True, null=True)
-    object_id = GenericForeignKey('content_type', 'object_id')
+    document_id = models.PositiveIntegerField()
+    document = GenericForeignKey('document_type', 'document_id')
     title = models.CharField(max_length=70)
     description = models.CharField(max_length=8000)
 
@@ -159,6 +160,7 @@ class Profile(models.Model):
     phone = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(max_length=200, blank=True, null=True)
     email_verified = models.BooleanField(db_column='emailVerified', blank=True, null=True)
+    alternative_email = models.EmailField(max_length=200, blank=True, null=True)
     title = models.ForeignKey(Title, on_delete=models.DO_NOTHING, db_column='titleId', blank=True, null=True)
     street_address = models.CharField(db_column='streetAddress', max_length=255, blank=True, null=True)
     postcode = models.CharField(db_column='postCode', max_length=12, blank=True, null=True)
@@ -355,6 +357,7 @@ class Round(models.Model):
     colour = models.CharField(max_length=30, blank=True, null=True)
     polygon = models.TextField(blank=True, null=True)
     technicians = models.ManyToManyField(Technician)
+    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
 
     class Meta:
         managed = True
@@ -519,7 +522,6 @@ class WorkorderLift(models.Model):
 
 class Workorder(models.Model):
     id = models.AutoField(primary_key=True)
-    workorder_lifts = models.ManyToManyField(WorkorderLift)
     id_by_project = models.IntegerField(db_column='idByProject')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId')
@@ -537,7 +539,7 @@ class Workorder(models.Model):
     detected_fault = models.IntegerField(db_column='detectedFaultId', blank=True, null=True)
     subject = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(max_length=32000, blank=True, null=True)
-    notes = models.ManyToManyField(Notes)
+    notes = models.ManyToManyField(Note)
     correction = models.ForeignKey(Correction, models.DO_NOTHING, db_column='correctionId')
     solution = models.TextField(max_length=32000, blank=True, null=True)
     signature = models.IntegerField(db_column='signatureId', blank=True, null=True)
@@ -564,7 +566,7 @@ class ClosedWorkorder(models.Model):
     process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
     priority = models.ForeignKey(Priority, on_delete=models.DO_NOTHING, db_column='priorityId')
     technician = models.ForeignKey(Technician, on_delete=models.DO_NOTHING, db_column='technicianId')
-    notes = models.ManyToManyField(Notes)
+    notes = models.ManyToManyField(Note)
     customer_id = models.IntegerField(db_column='customerId')
     accepted_datetime = models.DateTimeField(db_column='acceptedDatetime', blank=True, null=True)
     started_datetime = models.DateTimeField(db_column='startedDatetime', blank=True, null=True)
@@ -621,7 +623,7 @@ class Repair(models.Model):
     parts_description = models.TextField(max_length=2048, db_column='partsDescription',
                                          blank=True, null=True)
     parts = models.ManyToManyField(Part)
-    workorder = models.ForeignKey(Workorder, on_delete=models.DO_NOTHING)
+    workorder = models.OneToOneField(Workorder, on_delete=models.DO_NOTHING)
     quote_number = models.CharField(max_length=50, db_column='quoteNumber', blank=True, null=True)
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', default='1')
 

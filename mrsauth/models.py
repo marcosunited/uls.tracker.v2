@@ -28,7 +28,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True, db_column="user_id")
     firstName = models.CharField(max_length=30, db_column="first_name")
     lastName = models.CharField(max_length=30, db_column="last_name")
-    nick_name = models.CharField(max_length=20, db_column="nick_name", unique=True)
+    nick_name = models.EmailField(max_length=70, db_column="nick_name", unique=True)
     password = models.TextField()
     salt = models.TextField(blank=True, null=True)
     authentication_provider = models.CharField(max_length=30, db_column="auth_provider", blank=True, null=True)

@@ -37,6 +37,7 @@ class ProfilesSerializer(serializers.ModelSerializer):
                   'fullname',
                   'phone',
                   'email',
+                  'alternative_email',
                   'user')
 
 
@@ -57,6 +58,7 @@ class UsersSerializer(serializers.ModelSerializer):
                   'date_of_birth',
                   'profiles',
                   'groups')
+
         model = User
         extra_kwargs = {'password': {'write_only': True}}
         read_only_fields = ('auth_token',)

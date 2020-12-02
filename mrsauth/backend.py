@@ -6,10 +6,10 @@ from mrsauth.models import User
 
 class ModelAuthentication(ModelBackend):
 
-    def authenticate(self, username, password):
+    def authenticate(self, email, password):
 
         try:
-            user = User.objects.get(nick_name=username)
+            user = User.objects.get(nick_name=email)
 
             if getattr(user, 'statusId', 1) and check_password(password, user.password) is True:
                 return user
