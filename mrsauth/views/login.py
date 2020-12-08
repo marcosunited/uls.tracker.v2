@@ -12,9 +12,9 @@ from rest_framework.response import Response
 from rest_framework_jwt.serializers import jwt_payload_handler
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
-    HTTP_404_NOT_FOUND,
     HTTP_200_OK,
-    HTTP_417_EXPECTATION_FAILED
+    HTTP_401_UNAUTHORIZED
+
 )
 
 from mrsauth.backend import ModelAuthentication
@@ -47,7 +47,7 @@ def do_login(request):
 
     if not user:
         response = ObjectResponse(None, 'User or password is wrong')
-        return Response(response.result, status=HTTP_400_BAD_REQUEST)
+        return Response(response.result, status=HTTP_401_UNAUTHORIZED)
 
     # log to login history
     console = Console.objects.get(id=1)

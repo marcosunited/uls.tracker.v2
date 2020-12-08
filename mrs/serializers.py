@@ -199,6 +199,13 @@ class NotesSerializer(serializers.ModelSerializer):
         model = Note
         fields = ('__all__')
 
+
+class ReportHistorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ReportHistory
+        fields = ('__all__')
+
 """
 SYSTEM SERIALIZERS
 """

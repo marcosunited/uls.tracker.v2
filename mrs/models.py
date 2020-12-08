@@ -1,9 +1,11 @@
 # UNITED LIFTS MRS BASE MODEL
+
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.db.models import IntegerField, DateTimeField, BooleanField, FileField
+from django.utils import timezone
 
 from mrs.rules.Actions import JobActions
 from mrs.rules.Variables import JobVariables
@@ -107,7 +109,6 @@ class Project(models.Model):
     name = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True, db_column='isActive')
     description = models.CharField(max_length=255, blank=True, null=True)
-    key_name = models.CharField(db_column='keyName', max_length=8)
 
     class Meta:
         managed = True
@@ -326,6 +327,8 @@ class Correction(models.Model):
     class Meta:
         managed = True
         db_table = 'corrections'
+
+
 
 
 class Fault(models.Model):
@@ -769,6 +772,8 @@ class MrsField(models.Model):
 class Report(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
+    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING)
+    report_processor = models.CharField(max_length=150)
     report_template = models.TextField()
 
     class Meta:
@@ -782,10 +787,10 @@ class Report(models.Model):
 class ReportHistory(models.Model):
     id = models.AutoField(primary_key=True)
     report = models.ForeignKey(Report, on_delete=models.DO_NOTHING, db_column='reportId')
-    lunch_timestamp = models.DateTimeField(auto_now_add=True)
-    finish_timestamp = models.DateTimeField(blank=True, null=True)
-    output_file = FileField(upload_to=get_upload_path, storage=FileSystemStorage(location='c:\\reports'))
-
+    finish_timestamp = models.DateTimeField(default=timezone.now())
+    # lunch_timestamp = models.DateTimeField(default=timezone.now())
+    # output_file = FileField(upload_to=get_upload_path, storage=FileSystemStorage(location='c:\\reports'))
+    output_file = FileField(storage=FileSystemStorage(location='c:\\reports'))
     result = models.CharField(max_length=30, blank=True, null=True)
 
 
