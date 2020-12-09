@@ -70,9 +70,10 @@ class ModelMetaView(APIView):
     def get(self, request, model):
 
         model = apps.get_model('mrs', model)
-        for _field in model._meta.get_fields():
+        for _field in model._meta.concrete_fields:
             try:
                 field = MrsField.objects.filter(name=_field.__class__.__name__)
+                print(_field.name)
                 if field.count() == 1:
                     field = field[0]
                     if field:

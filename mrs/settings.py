@@ -7,8 +7,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '1)1q5ipvwlj%-9@jj6i5#hwss%_@pk7ftm!wh=dm+!uzaz((k1'
 DEBUG = True
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -108,12 +107,12 @@ REST_FRAMEWORK = {
 }
 
 JWT_AUTH = {
-
+    'JWT_ALLOW_REFRESH': True,
     'JWT_VERIFY': True,
     'JWT_VERIFY_EXPIRATION': True,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=5000),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=20),
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
-
+    'JWT_DECODE_HANDLER': 'mrsauth.backend.mrs_decode_handler',
 }
 
 AUTH_USER_MODEL = 'mrsauth.User'

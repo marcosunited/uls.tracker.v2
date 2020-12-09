@@ -12,8 +12,7 @@ class ProjectsSerializer(serializers.ModelSerializer):
         fields = ('id',
                   'name',
                   'is_active',
-                  'description',
-                  'key_name')
+                  'description',)
 
 
 class ContactsSerializer(serializers.ModelSerializer):

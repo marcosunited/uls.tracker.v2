@@ -1,10 +1,11 @@
 import jwt
+from django.contrib.auth import logout
 
 from django.contrib.auth.signals import user_logged_in
 from django.core.exceptions import ValidationError
-from django.http.response import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.validators import validate_email
+from rest_framework import status
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -16,8 +17,9 @@ from rest_framework.status import (
     HTTP_401_UNAUTHORIZED
 
 )
+from rest_framework_jwt.utils import jwt_decode_handler
 
-from mrsauth.backend import ModelAuthentication
+from mrsauth.backend import ModelAuthentication, TokenBlackList
 from mrs import settings
 from mrs.utils.response import ResponseHttp as ObjectResponse
 from mrsauth.models import Console, UsersHistoryLogin
@@ -58,6 +60,7 @@ def do_login(request):
 
     payload = jwt_payload_handler(user)
     token = jwt.encode(payload, settings.SECRET_KEY)
+
     user_logged_in.send(sender=user.__class__,
                         request=request, user=user)
 
@@ -72,3 +75,17 @@ def do_login(request):
     response = ObjectResponse(response, None)
 
     return Response(response.result, status=HTTP_200_OK)
+
+
+@csrf_exempt
+@api_view(["POST"])
+def do_logout(request):
+    try:
+        user = str(request.user)
+        token = request.auth
+        TokenBlackList.Instance().add(user, token)
+        logout(request)
+        return Response({'result': 'OK', 'error': ""}, status=HTTP_200_OK)
+    except Exception as e:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
