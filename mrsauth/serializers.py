@@ -8,18 +8,15 @@ from mrsauth.models import User
 
 
 class PermissionsSerializer(serializers.ModelSerializer):
-    content_type = PrimaryKeyRelatedField(many=False, queryset=ContentType.objects.all())
 
     class Meta:
         model = Permission
         fields = ('id',
-                  'name',
-                  'content_type',
-                  'codename')
+                  'name')
 
 
 class GroupsSerializer(serializers.ModelSerializer):
-    permissions = PrimaryKeyRelatedField(many=True, queryset=Permission.objects.all())
+    permissions = PermissionsSerializer(many=True)
 
     class Meta:
         model = Group

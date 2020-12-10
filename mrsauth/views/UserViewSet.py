@@ -63,12 +63,11 @@ class UserDetail(APIView):
         try:
             user = User.objects.get(pk=pk)
             user_serializer = UsersSerializer(user)
-            r = user_serializer.validated_data
+            r = user_serializer.data
             r["email"] = r["nick_name"]
             r.pop("nick_name")
             r.pop("salt")
             return JsonResponse({'result': r, 'error': ''}, status=HTTP_200_OK)
-
         except User.DoesNotExist:
             result = ResponseHttp(error='The user does not exist').result
             return JsonResponse(result, status=HTTP_404_NOT_FOUND)

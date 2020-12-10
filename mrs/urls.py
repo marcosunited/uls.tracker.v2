@@ -17,6 +17,9 @@ from mrs.views.BusinessViewSets import *
 
 router = QueryRouter()
 
+router.register(r'meta_types', MetadataTypeViewSet)
+router.register(r'meta_values', MetadataValuesViewSet)
+
 router.register(r'projects', ProjectViewSet)
 router.register(r'contacts', ContactViewSet)
 router.register(r'contracts', ContractViewSet)

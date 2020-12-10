@@ -5,7 +5,6 @@ from rest_framework import viewsets
 
 class CachedModelViewSet(viewsets.ModelViewSet):
 
-    # TODO: reactivate cache
-    ## @method_decorator(cache_page(60*60*2))
+    @method_decorator(cache_page(60*60*2))
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)

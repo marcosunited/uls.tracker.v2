@@ -2,7 +2,7 @@ from django.apps import apps
 from django.db.models import Lookup, CharField, TextField
 from django.db.models.fields import Field
 
-from rest_framework import serializers
+from rest_framework import serializers, viewsets
 from rest_framework.response import Response
 from rest_framework.routers import DefaultRouter, Route, DynamicRoute
 from rest_framework.status import HTTP_200_OK
@@ -90,7 +90,7 @@ class ModelMetaView(APIView):
         return Response(response.result, status=HTTP_200_OK)
 
 
-class FilteredModelViewSet(CachedModelViewSet):
+class FilteredModelViewSet(viewsets.ModelViewSet):
     operators = {}
 
     def get_queryset(self):
@@ -100,6 +100,7 @@ class FilteredModelViewSet(CachedModelViewSet):
                 FilteredModelViewSet.operators.update({operator.code: operator.django_lookup})
 
         query_set = super().get_queryset()
+
         if self.request.method == 'POST':
             try:
                 query_list = self.request.data["query"]
@@ -119,9 +120,9 @@ class FilteredModelViewSet(CachedModelViewSet):
                     query_set = query_set.filter(**kwargs)
             if order_by:
                 query_set.order_by(order_by)
-            return query_set
+            return query_set.filter(is_deleted=False)
 
-        return query_set
+        return query_set.filter(is_deleted=False)
 
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):

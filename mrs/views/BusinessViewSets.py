@@ -3,11 +3,23 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_E
 from rest_framework.views import APIView
 
 from mrs.serializers import *
+from mrs.utils.cache import CachedModelViewSet
 from mrs.utils.filter import FilteredModelViewSet
+from mrs.utils.model import LogicalDeleteModelViewSet
 from mrs.utils.response import ResponseHttp
 
 
-class ProjectViewSet(FilteredModelViewSet):
+class MetadataTypeViewSet(FilteredModelViewSet, CachedModelViewSet):
+    queryset = MetadataType.objects.all()
+    serializer_class = MetadataTypesSerializer
+
+
+class MetadataValuesViewSet(FilteredModelViewSet, CachedModelViewSet):
+    queryset = MetadataValue.objects.all()
+    serializer_class = MetadataValuesSerializer
+
+
+class ProjectViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectsSerializer
 

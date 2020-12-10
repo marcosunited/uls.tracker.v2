@@ -110,7 +110,7 @@ JWT_AUTH = {
     'JWT_ALLOW_REFRESH': True,
     'JWT_VERIFY': True,
     'JWT_VERIFY_EXPIRATION': True,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=20),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=500),
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
     'JWT_DECODE_HANDLER': 'mrsauth.backend.mrs_decode_handler',
 }

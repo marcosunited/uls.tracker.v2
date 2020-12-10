@@ -6,6 +6,23 @@ from mrs.models import *
 from mrs.utils.filter import DynamicFieldsModelSerializer
 
 
+class MetadataTypesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MetadataType
+        fields = ('id',
+                  'name',)
+
+
+class MetadataValuesSerializer(serializers.ModelSerializer):
+    type = PrimaryKeyRelatedField(many=False, queryset=MetadataType.objects.all())
+
+    class Meta:
+        model = MetadataValue
+        fields = ('id',
+                  'type',
+                  'value',)
+
+
 class ProjectsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
