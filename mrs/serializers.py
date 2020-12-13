@@ -105,23 +105,13 @@ class AgentsSerializer(serializers.ModelSerializer):
                   'name',
                   'contact')
 
-class CalloutsSerializer(serializers.ModelSerializer):
+    """
+    def create(self, validated_data):
+        _contact = validated_data.pop('contact')
+        _contact_id = _contact.pop('id')
+        Contact.objects.update_or_create(id=id, defaults=_contact)
+    """
 
-    class Meta:
-        model = Callout
-        fields = ('__all__')
-
-class MaintenancesSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Maintenance
-        fields = ('__all__')
-
-class RepairsSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Repair
-        fields = ('__all__')
 
 class JobsSerializer(DynamicFieldsModelSerializer):
     contract = PrimaryKeyRelatedField(many=False, queryset=Contract.objects.all())
@@ -170,9 +160,6 @@ class RoundsSerializer(serializers.ModelSerializer):
                   'technicians')
 
 
-
-
-
 class CorrectionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Correction
@@ -209,18 +196,23 @@ class ProceduresSerializer(serializers.ModelSerializer):
                   'tasks',
                   'service_target')
 
-class NotesSerializer(serializers.ModelSerializer):
+class WorkordersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Workorder
+        fields = '__all__'
 
+
+class NotesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note
-        fields = ('__all__')
+        fields = '__all__'
 
 
 class ReportHistorySerializer(serializers.ModelSerializer):
-
     class Meta:
         model = ReportHistory
-        fields = ('__all__')
+        fields = '__all__'
+
 
 """
 SYSTEM SERIALIZERS
@@ -249,4 +241,3 @@ def getDynamicSerializer(model):
                              model)
                      })
                  })
-

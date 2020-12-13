@@ -25,6 +25,7 @@ class MetadataType(models.Model):
     def __str__(self):
         return self.name
 
+
 class MetadataValue(models.Model):
     id = models.AutoField(primary_key=True)
     type = models.ForeignKey(MetadataType, on_delete=models.CASCADE)
@@ -37,6 +38,7 @@ class MetadataValue(models.Model):
 
     def __str__(self):
         return self.value
+
 
 class Note(models.Model):
     id = models.AutoField(primary_key=True)
@@ -164,6 +166,9 @@ class ProcessType(models.Model):
         managed = True
         db_table = 'process_types'
 
+    def __str__(self):
+        return self.name + " (" + self.project.name + ")"
+
 
 class ProcessTypeStatus(models.Model):
     id = models.AutoField(primary_key=True)
@@ -179,6 +184,9 @@ class ProcessTypeStatus(models.Model):
     class Meta:
         managed = True
         db_table = 'process_types_status'
+
+    def __str__(self):
+        return self.name + " (" + self.process_type.name + " - " +  self.project.name + ")"
 
 
 class Title(models.Model):
@@ -224,7 +232,7 @@ class Profile(models.Model):
 class Contact(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=50)
-    position = models.CharField(max_length=50)
+    position = models.PositiveIntegerField()
     first_name = models.CharField(max_length=70)
     last_name = models.CharField(max_length=70)
     phone_number = models.CharField(max_length=50)
@@ -522,9 +530,9 @@ class Workflow(models.Model):
     process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
     name = models.CharField(max_length=50, blank=True, null=True)
     description = models.CharField(max_length=255)
-    status = models.ForeignKey(ProcessTypeStatus, related_name='wo_current_status', on_delete=models.DO_NOTHING,
+    status = models.ForeignKey(ProcessTypeStatus, related_name='wf_current_status', on_delete=models.DO_NOTHING,
                                db_column='statusId')
-    next_status = models.ForeignKey(ProcessTypeStatus, related_name='wo_next_status', on_delete=models.DO_NOTHING,
+    next_status = models.ForeignKey(ProcessTypeStatus, related_name='wf_next_status', on_delete=models.DO_NOTHING,
                                     db_column='nextStatus')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
     is_deleted = models.BooleanField(default=False, db_column='isDeleted')
@@ -605,6 +613,7 @@ class Workorder(models.Model):
     part_required = models.IntegerField(db_column='partRequired')
     is_closed = models.BooleanField(default=False, db_column='isClosed')
     jha_items = models.ManyToManyField(JhaItem)
+    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
     is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
@@ -648,81 +657,6 @@ class ClosedWorkorder(models.Model):
     class Meta:
         managed = True
         db_table = 'closed_workorders'
-
-
-class Maintenance(models.Model):
-    id = models.AutoField(primary_key=True)
-    is_printed = models.IntegerField(db_column='isPrinted', blank=True, null=True)
-    service_area = models.ForeignKey(ServiceArea, on_delete=models.DO_NOTHING, db_column='serviceAreaId')
-    service_type = models.ForeignKey(ServiceTarget, on_delete=models.DO_NOTHING, db_column='serviceTypeId')
-    procedure = models.ManyToManyField(Procedure)  # procedure replace the list of Task in old model
-    completed_id = models.IntegerField(db_column='completedId', blank=True, null=True)
-    time_of_arrival = models.DateTimeField(db_column='timeArrival', blank=True, null=True)
-    time_of_depart = models.DateTimeField(db_column='timeDepart', blank=True, null=True)
-    docket_number = models.IntegerField(db_column='docketNumber', blank=True, null=True)
-    workorder = models.OneToOneField(Workorder, on_delete=models.DO_NOTHING, db_column='workorderId', default='1')
-    technician_signature = models.ImageField(db_column='technicianSignature', max_length=255, blank=True, null=True,
-                                             upload_to='images/signature')
-    customer_signature = models.ImageField(db_column='customerSignature', max_length=255, blank=True, null=True,
-                                           upload_to='images/signature')
-    status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', default='1')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
-
-    class Meta:
-        managed = True
-        db_table = 'maintenances'
-
-
-class Repair(models.Model):
-    id = models.AutoField(primary_key=True)
-    is_printed = models.IntegerField(db_column='isPrinted', blank=True, null=True)
-    job = models.ForeignKey(Job, on_delete=models.DO_NOTHING)
-    description = models.TextField(max_length=2048, blank=True, null=True)
-    parts_description = models.TextField(max_length=2048, db_column='partsDescription',
-                                         blank=True, null=True)
-    parts = models.ManyToManyField(Part)
-    workorder = models.OneToOneField(Workorder, on_delete=models.DO_NOTHING)
-    quote_number = models.CharField(max_length=50, db_column='quoteNumber', blank=True, null=True)
-    status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', default='1')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
-
-    class Meta:
-        managed = True
-        db_table = 'repairs'
-
-
-class Callout(models.Model):
-    id = models.AutoField(primary_key=True)
-    is_printed = models.IntegerField(db_column='isPrinted', blank=True, null=True)
-    fault = models.ForeignKey(Fault, on_delete=models.DO_NOTHING, db_column='faultId', default='1')
-    technician_fault = models.ForeignKey(Fault, on_delete=models.DO_NOTHING, db_column='technicianFaultId',
-                                         related_name='technician_fault', default='1')
-    priority = models.ForeignKey(Priority, on_delete=models.DO_NOTHING, db_column='priorityId', blank=True, null=True)
-    floor_number = models.CharField(db_column='floorNo', max_length=255, blank=True, null=True)
-    description = models.CharField(max_length=255, blank=True, null=True)
-    part_description = models.CharField(db_column='partDescription', max_length=255, blank=True, null=True)
-    correction = models.ForeignKey(Correction, models.DO_NOTHING, db_column='correctionId')
-    attributable_id = models.IntegerField(db_column='attributableId', blank=True, null=True)
-    tech_description = models.CharField(db_column='techDescription', max_length=255, blank=True, null=True)
-    workorder = models.OneToOneField(Workorder, on_delete=models.DO_NOTHING, db_column='workorderId', default='1')
-    docket_number = models.CharField(db_column='docketNumber', max_length=255, blank=True, null=True)
-    callout_time = models.DateTimeField(db_column='calloutTime', blank=True, null=True)
-    time_arrival = models.DateTimeField(db_column='timeArrival', blank=True, null=True)
-    rectification_time = models.DateTimeField(db_column='rectificationTime', blank=True, null=True)
-    time_departure = models.DateTimeField(db_column='timeDeparture', blank=True, null=True)
-    chargeable_id = models.IntegerField(db_column='chargeableId', blank=True, null=True)
-    technician_signature = models.CharField(db_column='technicianSignature', max_length=255, blank=True, null=True)
-    customer_signature = models.CharField(db_column='customerSignature', max_length=255, blank=True, null=True)
-    accepted_id = models.IntegerField(db_column='acceptedId', blank=True, null=True)
-    notify_email = models.EmailField(db_column='notifyEmail', max_length=200, blank=True, null=True)
-    verify = models.CharField(max_length=255, blank=True, null=True)
-    reported_customer = models.CharField(db_column='reportedCustomer', max_length=255, blank=True, null=True)
-    photo_name = models.CharField(db_column='photoName', max_length=50, blank=True, null=True)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
-
-    class Meta:
-        managed = True
-        db_table = 'callouts'
 
 
 class WorkordersHistory(models.Model):
