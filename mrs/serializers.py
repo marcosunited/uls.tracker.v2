@@ -105,12 +105,18 @@ class AgentsSerializer(serializers.ModelSerializer):
                   'name',
                   'contact')
 
-    """
     def create(self, validated_data):
-        _contact = validated_data.pop('contact')
-        _contact_id = _contact.pop('id')
-        Contact.objects.update_or_create(id=id, defaults=_contact)
-    """
+        contact_data = validated_data.pop('contact')
+        contact = Contact.objects.create(**contact_data)
+        agent = Agent.objects.create(contact=contact, **validated_data)
+        return agent
+
+    def update(self, instance, validated_data):
+        contact_data = validated_data.pop('contact')
+        Contact.objects.update(**contact_data)
+        instance.name = validated_data.get('name', instance.name)
+        instance.save()
+        return instance
 
 
 class JobsSerializer(DynamicFieldsModelSerializer):
@@ -195,6 +201,7 @@ class ProceduresSerializer(serializers.ModelSerializer):
                   'description',
                   'tasks',
                   'service_target')
+
 
 class WorkordersSerializer(serializers.ModelSerializer):
     class Meta:

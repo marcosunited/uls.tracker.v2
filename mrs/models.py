@@ -223,7 +223,7 @@ class Profile(MrsModel):
 
 class Contact(MrsModel):
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=50)
+    title = models.PositiveIntegerField()
     position = models.PositiveIntegerField()
     first_name = models.CharField(max_length=70)
     last_name = models.CharField(max_length=70)
