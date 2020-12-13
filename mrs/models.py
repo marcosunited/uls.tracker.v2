@@ -13,10 +13,16 @@ from mrs.utils.storage import FileDocument
 from mrsauth.models import User
 
 
-class MetadataType(models.Model):
+class MrsModel(models.Model):
+    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
+
+    class Meta:
+        abstract = True
+
+
+class MetadataType(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -26,11 +32,10 @@ class MetadataType(models.Model):
         return self.name
 
 
-class MetadataValue(models.Model):
+class MetadataValue(MrsModel):
     id = models.AutoField(primary_key=True)
     type = models.ForeignKey(MetadataType, on_delete=models.CASCADE)
     value = models.CharField(max_length=70)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -40,7 +45,7 @@ class MetadataValue(models.Model):
         return self.value
 
 
-class Note(models.Model):
+class Note(MrsModel):
     id = models.AutoField(primary_key=True)
     document_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING,
                                       db_column='contentTypeId', blank=True, null=True)
@@ -48,17 +53,15 @@ class Note(models.Model):
     document = GenericForeignKey('document_type', 'document_id')
     title = models.CharField(max_length=70)
     description = models.CharField(max_length=8000)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'notes'
 
 
-class ServiceArea(models.Model):
+class ServiceArea(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -66,10 +69,9 @@ class ServiceArea(models.Model):
         app_label = 'mrs'
 
 
-class ServiceType(models.Model):
+class ServiceType(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -77,11 +79,10 @@ class ServiceType(models.Model):
         app_label = 'mrs'
 
 
-class ServiceTarget(models.Model):
+class ServiceTarget(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     key_name = models.CharField(db_column='keyName', max_length=50)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -89,34 +90,31 @@ class ServiceTarget(models.Model):
         app_label = 'mrs'
 
 
-class Task(models.Model):
+class Task(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255, blank=True, null=True)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'tasks'
 
 
-class Procedure(models.Model):
+class Procedure(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=255, blank=True, null=True)
     tasks = models.ManyToManyField(Task)
     service_target = models.ForeignKey(ServiceTarget, on_delete=models.DO_NOTHING, db_column='serviceTargetId')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'procedures'
 
 
-class Month(models.Model):
+class Month(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -127,24 +125,22 @@ class Month(models.Model):
         return self.name
 
 
-class Country(models.Model):
+class Country(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=70)
     currency_code = models.CharField(max_length=3)
     unlocode = models.CharField(max_length=2)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'countries'
 
 
-class Project(models.Model):
+class Project(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True, db_column='isActive')
     description = models.CharField(max_length=255, blank=True, null=True)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -154,13 +150,12 @@ class Project(models.Model):
         return self.name
 
 
-class ProcessType(models.Model):
+class ProcessType(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=255)
     initial_status = models.IntegerField(db_column='initialStatus')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -170,7 +165,7 @@ class ProcessType(models.Model):
         return self.name + " (" + self.project.name + ")"
 
 
-class ProcessTypeStatus(models.Model):
+class ProcessTypeStatus(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=255)
@@ -179,7 +174,6 @@ class ProcessTypeStatus(models.Model):
     sequence_number = models.PositiveSmallIntegerField(default=1)
     process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -189,17 +183,16 @@ class ProcessTypeStatus(models.Model):
         return self.name + " (" + self.process_type.name + " - " +  self.project.name + ")"
 
 
-class Title(models.Model):
+class Title(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, blank=True, null=True)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'titles'
 
 
-class Profile(models.Model):
+class Profile(MrsModel):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, related_name='profiles', on_delete=models.DO_NOTHING, db_column='userId')
     fullname = models.CharField(db_column='fullName', max_length=50, blank=True, null=True)
@@ -219,7 +212,6 @@ class Profile(models.Model):
     projects = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId', blank=True, null=True)
     is_active = models.BooleanField(default=True, db_column='isActive', blank=True, null=True)
     avatar = models.ImageField(upload_to='images/avatar', blank=True, null=True)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -229,7 +221,7 @@ class Profile(models.Model):
         return self.fullname
 
 
-class Contact(models.Model):
+class Contact(MrsModel):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=50)
     position = models.PositiveIntegerField()
@@ -239,7 +231,6 @@ class Contact(models.Model):
     mobile_number = models.CharField(max_length=50)
     email = models.EmailField(max_length=200)
     address = models.CharField(max_length=250)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -249,35 +240,32 @@ class Contact(models.Model):
         return self.first_name + " " + self.last_name
 
 
-class Attachment(models.Model):
+class Attachment(MrsModel):
     id = models.AutoField(primary_key=True)
     conceptid = models.IntegerField(db_column='conceptId', unique=True)
     valueconcept = models.IntegerField(db_column='valueConcept')
     name = models.CharField(max_length=255)
     path = models.CharField(max_length=512)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'attachments'
 
 
-class Brand(models.Model):
+class Brand(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     company = models.CharField(max_length=100)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'brands'
 
 
-class Technician(models.Model):
+class Technician(MrsModel):
     id = models.AutoField(primary_key=True)
     profile = models.OneToOneField(Profile, on_delete=models.DO_NOTHING, db_column='profileId')
     notes = models.CharField(max_length=255)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -287,19 +275,18 @@ class Technician(models.Model):
         return self.profile.fullname
 
 
-class Supplier(models.Model):
+class Supplier(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=255, blank=True, null=True)
     contact = models.ForeignKey(Contact, on_delete=models.CASCADE)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'suppliers'
 
 
-class Part(models.Model):
+class Part(MrsModel):
     id = models.AutoField(primary_key=True)
     part_number = models.CharField(max_length=50)
     name = models.CharField(max_length=50)
@@ -307,32 +294,29 @@ class Part(models.Model):
     brand = models.ForeignKey(Brand, on_delete=models.DO_NOTHING, db_column='brandId', blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
     supplier = models.ForeignKey(Supplier, on_delete=models.DO_NOTHING, db_column='supplierId', blank=True, null=True)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'parts'
 
 
-class Inventory(models.Model):
+class Inventory(MrsModel):
     id = models.AutoField(primary_key=True)
     part = models.ForeignKey(Part, on_delete=models.DO_NOTHING, db_column='partId', blank=True, null=True)
     reorder_details = models.CharField(max_length=255, blank=True, null=True)
     quantity = models.IntegerField(db_column='quantity')
     warning_quantity = models.IntegerField(db_column='warning_quantity')
     shelf_number = models.CharField(max_length=50)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'inventory'
 
 
-class ContractFrequency(models.Model):
+class ContractFrequency(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     days_frequency = IntegerField(default=7)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -342,7 +326,7 @@ class ContractFrequency(models.Model):
         return self.name
 
 
-class Contract(models.Model):
+class Contract(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50, blank=True, null=True)
     is_active = models.BooleanField(db_column='isActive', blank=True, null=True)
@@ -357,7 +341,6 @@ class Contract(models.Model):
     contract_frequency = models.OneToOneField(ContractFrequency, on_delete=models.CASCADE, blank=True, null=True)
     notes = models.CharField(max_length=255, blank=True, null=True)
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', default='1')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -367,43 +350,40 @@ class Contract(models.Model):
         return self.name
 
 
-class Correction(models.Model):
+class Correction(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=250)
     service_target_id = models.IntegerField(db_column='serviceTargetId')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'corrections'
 
 
-class Fault(models.Model):
+class Fault(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=255, blank=True, null=True)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'faults'
 
 
-class JhaItem(models.Model):
+class JhaItem(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255, blank=True, null=True)
     is_active = models.IntegerField(db_column='isActive')
     is_ticked_default = models.IntegerField(db_column='isTickedDefault', blank=True, null=True)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'jha_items'
 
 
-class Round(models.Model):
+class Round(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     is_active = models.BooleanField(db_column='isActive')
@@ -411,7 +391,6 @@ class Round(models.Model):
     polygon = models.TextField(blank=True, null=True)
     technicians = models.ManyToManyField(Technician)
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -421,11 +400,10 @@ class Round(models.Model):
         return self.name
 
 
-class Agent(models.Model):
+class Agent(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     contact = models.OneToOneField(Contact, on_delete=models.CASCADE)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -435,7 +413,7 @@ class Agent(models.Model):
         return self.name + " - " + self.contact.first_name + " " + self.contact.last_name
 
 
-class Job(models.Model):
+class Job(MrsModel):
     id = models.AutoField(primary_key=True)
     number = models.IntegerField(verbose_name='Number')
     name = models.CharField(max_length=50, verbose_name='Name')
@@ -455,7 +433,6 @@ class Job(models.Model):
     owner_details = models.CharField(db_column='ownerDetails', max_length=250, blank=True, null=True)
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', default='1')
     documents = models.ManyToManyField(FileDocument)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -469,7 +446,7 @@ class Job(models.Model):
         return self.name
 
 
-class Lift(models.Model):
+class Lift(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=50, blank=True, null=True)
@@ -485,26 +462,24 @@ class Lift(models.Model):
     installed_date = models.DateTimeField(db_column='installedDate', blank=True, null=True)
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', blank=True,
                                null=True)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'lifts'
 
 
-class ServicesTypes(models.Model):
+class ServicesTypes(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     key_name = models.CharField(db_column='keyName', max_length=10)
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'services_types'
 
 
-class Settings(models.Model):
+class Settings(MrsModel):
     id = models.AutoField(primary_key=True)
     module = models.CharField(max_length=20)
     key = models.CharField(max_length=3)
@@ -515,7 +490,6 @@ class Settings(models.Model):
     value3 = models.CharField(max_length=255, blank=True, null=True)
     value4 = models.CharField(max_length=255, blank=True, null=True)
     value5 = models.CharField(max_length=255, blank=True, null=True)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -525,7 +499,7 @@ class Settings(models.Model):
         return self.module + "(" + self.code + ")"
 
 
-class Workflow(models.Model):
+class Workflow(MrsModel):
     id = models.AutoField(primary_key=True)
     process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
     name = models.CharField(max_length=50, blank=True, null=True)
@@ -535,14 +509,13 @@ class Workflow(models.Model):
     next_status = models.ForeignKey(ProcessTypeStatus, related_name='wf_next_status', on_delete=models.DO_NOTHING,
                                     db_column='nextStatus')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'workflows'
 
 
-class WorkflowEvent(models.Model):
+class WorkflowEvent(MrsModel):
     id = models.AutoField(primary_key=True)
     process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
     previous_status = models.ForeignKey(ProcessTypeStatus, related_name='event_previous_status',
@@ -551,24 +524,22 @@ class WorkflowEvent(models.Model):
                                    db_column='newStatus')
     workflow = models.ForeignKey(Workflow, on_delete=models.DO_NOTHING, db_column='workflowId')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'workflow_event'
 
 
-class Priority(models.Model):
+class Priority(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'priority'
 
 
-class WorkorderLift(models.Model):
+class WorkorderLift(MrsModel):
     id = models.AutoField(primary_key=True)
     lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId')
@@ -576,14 +547,13 @@ class WorkorderLift(models.Model):
     started_datetime = models.DateTimeField(db_column='startedDatetime', blank=True, null=True)
     completed_datetime = models.DateTimeField(db_column='completedDatetime', blank=True, null=True)
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'workorders_lifts'
 
 
-class Workorder(models.Model):
+class Workorder(MrsModel):
     id = models.AutoField(primary_key=True)
     id_by_project = models.IntegerField(db_column='idByProject')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
@@ -614,14 +584,13 @@ class Workorder(models.Model):
     is_closed = models.BooleanField(default=False, db_column='isClosed')
     jha_items = models.ManyToManyField(JhaItem)
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'workorders'
 
 
-class ClosedWorkorder(models.Model):
+class ClosedWorkorder(MrsModel):
     id = models.AutoField(primary_key=True)
     workorder_lifts = models.ManyToManyField(WorkorderLift)
     id_by_project = models.IntegerField(db_column='idByProject')
@@ -652,14 +621,13 @@ class ClosedWorkorder(models.Model):
     expected_time = models.IntegerField(db_column='expectedTime', blank=True, null=True)
     is_chargeable = models.BooleanField(default='False', db_column='isChargeable')
     part_required = models.IntegerField(db_column='partRequired')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'closed_workorders'
 
 
-class WorkordersHistory(models.Model):
+class WorkordersHistory(MrsModel):
     id = models.AutoField(primary_key=True)
     workorder = models.ForeignKey(Workorder, on_delete=models.DO_NOTHING, db_column='workorderId')
     change_type_id = models.IntegerField(db_column='changeTypeId')
@@ -667,14 +635,13 @@ class WorkordersHistory(models.Model):
     user_id = models.IntegerField(db_column='userId', unique=True)
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
     timestamp = models.DateTimeField(default=timezone.now())
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'workorders_history'
 
 
-class PartRequest(models.Model):
+class PartRequest(MrsModel):
     id = models.AutoField(primary_key=True)
     quantity = models.IntegerField(db_column='quantity')
     part = models.ForeignKey(Part, on_delete=models.DO_NOTHING, db_column='partId')
@@ -684,14 +651,13 @@ class PartRequest(models.Model):
     remark = models.CharField(max_length=512, blank=True, null=True)
     project = models.IntegerField(db_column='projectId')
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', default='1')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'parts_requests'
 
 
-class WorkorderLocation(models.Model):
+class WorkorderLocation(MrsModel):
     id = models.AutoField(primary_key=True)
     workorder = models.ForeignKey(Workorder, on_delete=models.DO_NOTHING, db_column='workorderId')
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId')
@@ -699,32 +665,29 @@ class WorkorderLocation(models.Model):
     longitude = models.DecimalField(max_digits=4, decimal_places=4, blank=True, null=True)
     position = models.TextField()
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'workorders_positions'
 
 
-class MaintenancePlan(models.Model):
+class MaintenancePlan(MrsModel):
     id = models.AutoField(primary_key=True)
     lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
     procedures = models.ManyToManyField(Procedure)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
         db_table = 'maintenance_plans'
 
 
-class ScheduleEntry(models.Model):
+class ScheduleEntry(MrsModel):
     id = models.AutoField(primary_key=True)
     notes = models.CharField(max_length=255, blank=True, null=True)
     lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
     procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, db_column='taskId')
     schedule_date = models.DateField(db_column='scheduleDate')
     workorder = models.OneToOneField(Workorder, on_delete=models.CASCADE, primary_key=False)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -736,13 +699,12 @@ SYSTEM MODELS
 """
 
 
-class MrsOperator(models.Model):
+class MrsOperator(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     code = models.CharField(max_length=50)
     django_lookup = models.CharField(max_length=50)
     rules_operator = models.CharField(max_length=50, blank=True, null=True)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -752,13 +714,12 @@ class MrsOperator(models.Model):
         return self.name
 
 
-class MrsField(models.Model):
+class MrsField(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50, unique=True)
     operators = models.ManyToManyField(MrsOperator)
     isList = models.BooleanField(default=False)
     list_source_model = models.CharField(max_length=50, blank=True, null=True)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -768,13 +729,12 @@ class MrsField(models.Model):
         return self.name
 
 
-class Report(models.Model):
+class Report(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING)
     report_processor = models.CharField(max_length=150)
     report_template = models.TextField()
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     class Meta:
         managed = True
@@ -784,7 +744,7 @@ class Report(models.Model):
         return self.name
 
 
-class ReportHistory(models.Model):
+class ReportHistory(MrsModel):
     id = models.AutoField(primary_key=True)
     report = models.ForeignKey(Report, on_delete=models.DO_NOTHING, db_column='reportId')
     finish_timestamp = models.DateTimeField(default=timezone.now())
@@ -792,16 +752,14 @@ class ReportHistory(models.Model):
     # output_file = FileField(upload_to=get_upload_path, storage=FileSystemStorage(location='c:\\reports'))
     output_file = FileField(storage=FileSystemStorage(location='c:\\reports'))
     result = models.CharField(max_length=30, blank=True, null=True)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
 
-class Rule(models.Model):
+class Rule(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=20)
     content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, db_column='contentTypeId', null=True)
     description = models.TextField(blank=True, null=True)
     conditions = models.JSONField()
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
     # project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId', blank=True, null=True)
 
@@ -813,7 +771,7 @@ class Rule(models.Model):
         return self.name
 
 
-class ActionsHistory(models.Model):
+class ActionsHistory(MrsModel):
     id = models.AutoField(primary_key=True)
     rule = models.JSONField()
     variables = models.CharField(max_length=250, blank=True)
@@ -824,7 +782,6 @@ class ActionsHistory(models.Model):
     timestamp = DateTimeField(auto_now_add=True, editable=False, null=False, blank=False)
     hash = models.CharField(max_length=250, blank=True)
     executed = models.BooleanField(blank=True, null=True)
-    is_deleted = models.BooleanField(default=False, db_column='isDeleted')
 
 
 # init models event receivers to enable rules engine
