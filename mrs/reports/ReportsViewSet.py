@@ -7,7 +7,6 @@ from rest_framework.views import APIView
 from mrs.models import Report
 from mrs.reports.Renderer import render_to_pdf
 from mrs.reports.ReportsConf import reports_processors
-from mrs.serializers import ReportHistorySerializer
 from mrs.utils.response import ResponseHttp
 
 

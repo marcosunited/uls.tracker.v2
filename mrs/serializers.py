@@ -154,7 +154,8 @@ class TechniciansSerializer(serializers.ModelSerializer):
 
 
 class RoundsSerializer(serializers.ModelSerializer):
-    technicians = TechniciansSerializer(many=True)
+    technicians = TechniciansSerializer(many=True, read_only=True)
+    project = PrimaryKeyRelatedField(many=False, queryset=Project.objects.all())
 
     class Meta:
         model = Round
@@ -163,7 +164,8 @@ class RoundsSerializer(serializers.ModelSerializer):
                   'is_active',
                   'colour',
                   'polygon',
-                  'technicians')
+                  'technicians',
+                  'project')
 
 
 class CorrectionsSerializer(serializers.ModelSerializer):

@@ -389,7 +389,7 @@ class Round(MrsModel):
     is_active = models.BooleanField(db_column='isActive')
     colour = models.CharField(max_length=30, blank=True, null=True)
     polygon = models.TextField(blank=True, null=True)
-    technicians = models.ManyToManyField(Technician)
+    technicians = models.ManyToManyField(Technician, blank=True)
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
 
     class Meta:
