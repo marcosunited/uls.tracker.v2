@@ -58,6 +58,9 @@ class Note(MrsModel):
         managed = True
         db_table = 'notes'
 
+    def __str__(self):
+        return self.title
+
 
 class ServiceArea(MrsModel):
     id = models.AutoField(primary_key=True)
@@ -68,6 +71,9 @@ class ServiceArea(MrsModel):
         db_table = 'service_area'
         app_label = 'mrs'
 
+    def __str__(self):
+        return self.name
+
 
 class ServiceType(MrsModel):
     id = models.AutoField(primary_key=True)
@@ -77,6 +83,9 @@ class ServiceType(MrsModel):
         managed = True
         db_table = 'service_type'
         app_label = 'mrs'
+
+    def __str__(self):
+        return self.name
 
 
 class ServiceTarget(MrsModel):
@@ -89,6 +98,8 @@ class ServiceTarget(MrsModel):
         db_table = 'services_targets'
         app_label = 'mrs'
 
+    def __str__(self):
+        return self.name
 
 class Task(MrsModel):
     id = models.AutoField(primary_key=True)
@@ -98,6 +109,9 @@ class Task(MrsModel):
     class Meta:
         managed = True
         db_table = 'tasks'
+
+    def __str__(self):
+        return self.name
 
 
 class Procedure(MrsModel):
@@ -110,6 +124,9 @@ class Procedure(MrsModel):
     class Meta:
         managed = True
         db_table = 'procedures'
+
+    def __str__(self):
+        return self.name
 
 
 class Month(MrsModel):
@@ -134,6 +151,9 @@ class Country(MrsModel):
     class Meta:
         managed = True
         db_table = 'countries'
+
+    def __str__(self):
+        return self.name
 
 
 class Project(MrsModel):
@@ -190,6 +210,9 @@ class Title(MrsModel):
     class Meta:
         managed = True
         db_table = 'titles'
+
+    def __str__(self):
+        return self.name
 
 
 class Profile(MrsModel):
@@ -251,6 +274,9 @@ class Attachment(MrsModel):
         managed = True
         db_table = 'attachments'
 
+    def __str__(self):
+        return self.name
+
 
 class Brand(MrsModel):
     id = models.AutoField(primary_key=True)
@@ -260,6 +286,9 @@ class Brand(MrsModel):
     class Meta:
         managed = True
         db_table = 'brands'
+
+    def __str__(self):
+        return self.name
 
 
 class Technician(MrsModel):
@@ -285,6 +314,9 @@ class Supplier(MrsModel):
         managed = True
         db_table = 'suppliers'
 
+    def __str__(self):
+        return self.name
+
 
 class Part(MrsModel):
     id = models.AutoField(primary_key=True)
@@ -299,6 +331,9 @@ class Part(MrsModel):
         managed = True
         db_table = 'parts'
 
+    def __str__(self):
+        return self.name
+
 
 class Inventory(MrsModel):
     id = models.AutoField(primary_key=True)
@@ -311,6 +346,9 @@ class Inventory(MrsModel):
     class Meta:
         managed = True
         db_table = 'inventory'
+
+    def __str__(self):
+        return self.part.name + " (" + self.quantity + ")"
 
 
 class ContractFrequency(MrsModel):
@@ -360,6 +398,9 @@ class Correction(MrsModel):
         managed = True
         db_table = 'corrections'
 
+    def __str__(self):
+        return self.name
+
 
 class Fault(MrsModel):
     id = models.AutoField(primary_key=True)
@@ -369,6 +410,9 @@ class Fault(MrsModel):
     class Meta:
         managed = True
         db_table = 'faults'
+
+    def __str__(self):
+        return self.name
 
 
 class JhaItem(MrsModel):
@@ -381,6 +425,9 @@ class JhaItem(MrsModel):
     class Meta:
         managed = True
         db_table = 'jha_items'
+
+    def __str__(self):
+        return self.name
 
 
 class Round(MrsModel):
@@ -467,6 +514,9 @@ class Lift(MrsModel):
         managed = True
         db_table = 'lifts'
 
+    def __str__(self):
+        return self.name
+
 
 class ServicesTypes(MrsModel):
     id = models.AutoField(primary_key=True)
@@ -477,6 +527,9 @@ class ServicesTypes(MrsModel):
     class Meta:
         managed = True
         db_table = 'services_types'
+
+    def __str__(self):
+        return self.name
 
 
 class Settings(MrsModel):
@@ -514,6 +567,9 @@ class Workflow(MrsModel):
         managed = True
         db_table = 'workflows'
 
+    def __str__(self):
+        return self.name
+
 
 class WorkflowEvent(MrsModel):
     id = models.AutoField(primary_key=True)
@@ -529,6 +585,9 @@ class WorkflowEvent(MrsModel):
         managed = True
         db_table = 'workflow_event'
 
+    def __str__(self):
+        return self.process_type.name + " (" + self.previous_status.name + " -> " + self.new_status.name + ")"
+
 
 class Priority(MrsModel):
     id = models.AutoField(primary_key=True)
@@ -537,6 +596,9 @@ class Priority(MrsModel):
     class Meta:
         managed = True
         db_table = 'priority'
+
+    def __str__(self):
+        return self.name
 
 
 class WorkorderLift(MrsModel):
@@ -551,6 +613,8 @@ class WorkorderLift(MrsModel):
     class Meta:
         managed = True
         db_table = 'workorders_lifts'
+
+
 
 
 class Workorder(MrsModel):
@@ -673,6 +737,7 @@ class WorkorderLocation(MrsModel):
 
 class MaintenancePlan(MrsModel):
     id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
     lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
     procedures = models.ManyToManyField(Procedure)
 
@@ -748,8 +813,6 @@ class ReportHistory(MrsModel):
     id = models.AutoField(primary_key=True)
     report = models.ForeignKey(Report, on_delete=models.DO_NOTHING, db_column='reportId')
     finish_timestamp = models.DateTimeField(default=timezone.now())
-    # lunch_timestamp = models.DateTimeField(default=timezone.now())
-    # output_file = FileField(upload_to=get_upload_path, storage=FileSystemStorage(location='c:\\reports'))
     output_file = FileField(storage=FileSystemStorage(location='c:\\reports'))
     result = models.CharField(max_length=30, blank=True, null=True)
 
@@ -760,8 +823,7 @@ class Rule(MrsModel):
     content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, db_column='contentTypeId', null=True)
     description = models.TextField(blank=True, null=True)
     conditions = models.JSONField()
-
-    # project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId', blank=True, null=True)
+    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId', blank=True, null=True)
 
     class Meta:
         managed = True
