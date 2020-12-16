@@ -143,14 +143,70 @@ class JobsSerializer(DynamicFieldsModelSerializer):
                   'address')
 
 
+class TitlesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Title
+        fields = ('id',
+                  'name',)
+
+
+class CountriesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Country
+        fields = ('id',
+                  'name',
+                  'currency_code',
+                  'unlocode',)
+
+
+class ProfilesSerializer(serializers.ModelSerializer):
+    user = PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
+    project = PrimaryKeyRelatedField(many=False, queryset=Project.objects.all())
+    title = TitlesSerializer(many=False, read_only=True)
+    country = CountriesSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = ('id',
+                  'user',
+                  'fullname',
+                  'phone',
+                  'email',
+                  'email_verified',
+                  'alternative_email',
+                  'title',
+                  'street_address',
+                  'country',
+                  'phone_verified',
+                  'last_position',
+                  'localization_code',
+                  'currency_code',
+                  'project',
+                  'is_active',
+                  'avatar')
+
+
 class TechniciansSerializer(serializers.ModelSerializer):
-    profile = PrimaryKeyRelatedField(many=False, queryset=Profile.objects.all())
+    profile = ProfilesSerializer(many=False)
 
     class Meta:
         model = Technician
         fields = ('id',
                   'profile',
                   'notes',)
+
+    def create(self, validated_data):
+        profile_data = validated_data.pop('profile')
+        profile = Profile.objects.create(**profile_data)
+        technician = Technician.objects.create(profile=profile, **validated_data)
+        return technician
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop('profile')
+        Profile.objects.update(**profile_data)
+        instance.notes = validated_data.get('notes', instance.notes)
+        instance.save()
+        return instance
 
 
 class RoundsSerializer(serializers.ModelSerializer):

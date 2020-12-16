@@ -1,4 +1,3 @@
-from auditlog.models import LogEntry
 from business_rules import export_rule_data, run_all
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType

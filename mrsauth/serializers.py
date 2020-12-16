@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.relations import PrimaryKeyRelatedField
 
 from mrs.models import Profile
+from mrs.serializers import ProfilesSerializer
 from mrsauth.models import User
 
 
@@ -25,21 +26,8 @@ class GroupsSerializer(serializers.ModelSerializer):
                   'permissions')
 
 
-class ProfilesSerializer(serializers.ModelSerializer):
-    user = PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
-
-    class Meta:
-        model = Profile
-        fields = ('id',
-                  'fullname',
-                  'phone',
-                  'email',
-                  'alternative_email',
-                  'user')
-
-
 class UsersSerializer(serializers.ModelSerializer):
-    profiles = ProfilesSerializer(many=True, read_only=True)
+    profile = ProfilesSerializer(many=False, read_only=True)
     groups = GroupsSerializer(many=True, read_only=True)
 
     class Meta:
@@ -53,7 +41,7 @@ class UsersSerializer(serializers.ModelSerializer):
                   'updatedDate',
                   'password',
                   'date_of_birth',
-                  'profiles',
+                  'profile',
                   'groups')
 
         model = User
