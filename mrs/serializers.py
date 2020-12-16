@@ -162,6 +162,7 @@ class CountriesSerializer(serializers.ModelSerializer):
 class ProfilesSerializer(serializers.ModelSerializer):
     user = PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
     projects = PrimaryKeyRelatedField(many=True, queryset=Project.objects.all())
+    default_project = PrimaryKeyRelatedField(many=False, queryset=Project.objects.all())
     title = TitlesSerializer(many=False, read_only=True)
     country = CountriesSerializer(many=False, read_only=True)
 
@@ -182,6 +183,7 @@ class ProfilesSerializer(serializers.ModelSerializer):
                   'localization_code',
                   'currency_code',
                   'projects',
+                  'default_project',
                   'is_active',
                   'avatar')
 

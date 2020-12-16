@@ -115,6 +115,7 @@ class ProfileProjectRelationView(APIView):
         except Exception as error:
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class AgentViewSet(FilteredModelViewSet):
     queryset = Agent.objects.all()
     serializer_class = AgentsSerializer
