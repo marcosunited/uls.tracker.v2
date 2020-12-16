@@ -452,6 +452,7 @@ class Agent(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     contact = models.OneToOneField(Contact, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
 
     class Meta:
         managed = True

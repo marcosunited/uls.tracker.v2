@@ -98,12 +98,13 @@ class LiftsSerializer(serializers.ModelSerializer):
 
 class AgentsSerializer(serializers.ModelSerializer):
     contact = ContactsSerializer(many=False)
-
+    project = PrimaryKeyRelatedField(many=False, queryset=Project.objects.all())
     class Meta:
         model = Agent
         fields = ('id',
                   'name',
-                  'contact')
+                  'contact',
+                  'project')
 
     def create(self, validated_data):
         contact_data = validated_data.pop('contact')
@@ -115,6 +116,7 @@ class AgentsSerializer(serializers.ModelSerializer):
         contact_data = validated_data.pop('contact')
         Contact.objects.update(**contact_data)
         instance.name = validated_data.get('name', instance.name)
+        instance.project = validated_data.get('project', instance.project)
         instance.save()
         return instance
 
