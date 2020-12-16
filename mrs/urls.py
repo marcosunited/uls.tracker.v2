@@ -21,6 +21,7 @@ router.register(r'meta_types', MetadataTypeViewSet)
 router.register(r'meta_values', MetadataValuesViewSet)
 
 router.register(r'projects', ProjectViewSet)
+router.register(r'profiles', ProfileViewSet)
 router.register(r'contacts', ContactViewSet)
 router.register(r'contracts', ContractViewSet)
 router.register(r'contractsfrequencies', ContractFrequencyViewSet)
@@ -46,8 +47,12 @@ urlpatterns = [
     url(r'^api/v1/', include(router.urls)),
 
     # rounds - technicians
-    url(r'^api/v1/rounds/(?P<pk_round>[0-9]+)/technician/(?P<pk_technician>[0-9]+)$',
+    url(r'^api/v1/rounds/(?P<pk_round>[0-9]+)/technicians/(?P<pk_technician>[0-9]+)$',
         BusinessViewSets.RoundTechnicianRelationView.as_view()),
+
+    # profiles - projects
+    url(r'^api/v1/profiles/(?P<pk_profile>[0-9]+)/projects/(?P<pk_project>[0-9]+)$',
+        BusinessViewSets.ProfileProjectRelationView.as_view()),
 
     # technicians - jobs
     url(r'^api/v1/technicians/(?P<pk_technician>[0-9]+)/getJobs$',

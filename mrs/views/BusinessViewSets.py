@@ -49,7 +49,7 @@ class RoundViewSet(FilteredModelViewSet):
     serializer_class = RoundsSerializer
 
 
-# /rounds/idRound/addTech/idTec/
+# /rounds/idRound/technicians/idTec/
 class RoundTechnicianRelationView(APIView):
     def post(self, request, pk_round, pk_technician):
         try:
@@ -80,6 +80,41 @@ class RoundTechnicianRelationView(APIView):
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class ProfileViewSet(FilteredModelViewSet):
+    queryset = Profile.objects.all()
+    serializer_class = ProjectsSerializer
+
+
+# /profiles/idProfile/project/idProject/
+class ProfileProjectRelationView(APIView):
+    def post(self, request, pk_profile, pk_project):
+        try:
+            profile = Profile.objects.get(id=pk_profile)
+            project = Project.objects.get(id=pk_project)
+            profile.projects.add(project.id)
+            profile_serializer = ProfilesSerializer(profile)
+            return JsonResponse({'result': profile_serializer.data, 'error': ''})
+        except Profile.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The profile does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Project.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The project does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, pk_profile, pk_project):
+        try:
+            profile = Profile.objects.get(id=pk_profile)
+            project = Project.objects.get(id=pk_project)
+            profile.projects.remove(project.id)
+            profile_serializer = ProfilesSerializer(profile)
+            return JsonResponse({'result': profile_serializer.data, 'error': ''})
+        except Profile.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The profile does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Project.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The project does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
 class AgentViewSet(FilteredModelViewSet):
     queryset = Agent.objects.all()
     serializer_class = AgentsSerializer
@@ -103,60 +138,6 @@ class TechnicianJobsRelationView(APIView):
                 for job in _jobs:
                     jobs.append(JobsSerializer(job).data)
             return JsonResponse({'result': jobs, 'error': ''})
-        except Technician.DoesNotExist:
-            return JsonResponse(ResponseHttp(error='The technician does not exist').result, status=HTTP_404_NOT_FOUND)
-        except Exception as error:
-            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# /technicians/idTechnician/getCallouts
-class TechnicianCalloutsRelationView(APIView):
-    def get(self, request, pk_technician):
-        try:
-            project_id = self.request.query_params.get('projectId')
-            technician = Technician.objects.get(id=pk_technician)
-            workorders = technician.workorder_set.filter(process_type_name='CALLOUT',
-                                                         project_id=project_id)
-            callouts = []
-            for workorder in workorders:
-                callouts.append(CalloutsSerializer(workorder.callout).data)
-            return JsonResponse({'result': callouts, 'error': ''})
-        except Technician.DoesNotExist:
-            return JsonResponse(ResponseHttp(error='The technician does not exist').result, status=HTTP_404_NOT_FOUND)
-        except Exception as error:
-            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# /technicians/idTechnician/getMaintenances
-class TechnicianMaintenancesRelationView(APIView):
-    def get(self, request, pk_technician):
-        try:
-            project_id = self.request.query_params.get('projectId')
-            technician = Technician.objects.get(id=pk_technician)
-            workorders = technician.workorder_set.filter(process_type_name='MAINTENANCE',
-                                                         project_id=project_id)
-            maintenances = []
-            for workorder in workorders:
-                maintenances.append(MaintenancesSerializer(workorder.maintenance).data)
-            return JsonResponse({'result': maintenances, 'error': ''})
-        except Technician.DoesNotExist:
-            return JsonResponse(ResponseHttp(error='The technician does not exist').result, status=HTTP_404_NOT_FOUND)
-        except Exception as error:
-            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# /technicians/idTechnician/getRepairs
-class TechnicianMaintenancesRelationView(APIView):
-    def get(self, request, pk_technician):
-        try:
-            project_id = self.request.query_params.get('projectId')
-            technician = Technician.objects.get(id=pk_technician)
-            workorders = technician.workorder_set.filter(process_type_name='REPAIR',
-                                                         project_id=project_id)
-            repairs = []
-            for workorder in workorders:
-                repairs.append(RepairsSerializer(workorder.repair).data)
-            return JsonResponse({'result': repairs, 'error': ''})
         except Technician.DoesNotExist:
             return JsonResponse(ResponseHttp(error='The technician does not exist').result, status=HTTP_404_NOT_FOUND)
         except Exception as error:

@@ -232,7 +232,7 @@ class Profile(MrsModel):
     last_position = models.TextField(db_column='lastPosition', blank=True, null=True)
     localization_code = models.CharField(db_column='localizationCode', max_length=8, blank=True, null=True)
     currency_code = models.CharField(db_column='currencyCode', max_length=3, blank=True, null=True)
-    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId', blank=True, null=True)
+    projects = models.ManyToManyField(Project, blank=True, null=True)
     is_active = models.BooleanField(default=True, db_column='isActive', blank=True, null=True)
     avatar = models.ImageField(upload_to='images/avatar', blank=True, null=True)
 
