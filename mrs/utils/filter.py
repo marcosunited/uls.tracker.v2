@@ -81,7 +81,7 @@ class ModelMetaView(APIView):
                                             'isRelation': _field.is_relation,
                                             'meta': field_serializer.data})
                 else:
-                    for _nested_field in _field.model._meta.fields:
+                    for _nested_field in _field.related_model._meta.fields:
                         nested_field = MrsField.objects.filter(name=_nested_field.__class__.__name__)
                         if nested_field.count() == 1:
                             nested_field = nested_field[0]
