@@ -9,7 +9,6 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
 from mrs.models import MrsField, MrsOperator
-from mrs.utils.cache import CachedModelViewSet
 
 from mrs.utils.response import ResponseHttp as ObjectResponse
 
@@ -70,10 +69,9 @@ class ModelMetaView(APIView):
     def get(self, request, model):
 
         model = apps.get_model('mrs', model)
-        for _field in model._meta.concrete_fields:
+        for _field in model._meta.fields:
             try:
                 field = MrsField.objects.filter(name=_field.__class__.__name__)
-                print(_field.name)
                 if field.count() == 1:
                     field = field[0]
                     if field:
@@ -82,6 +80,17 @@ class ModelMetaView(APIView):
                                             'display': _field.verbose_name,
                                             'isRelation': _field.is_relation,
                                             'meta': field_serializer.data})
+                else:
+                    for _nested_field in _field.model._meta.fields:
+                        nested_field = MrsField.objects.filter(name=_nested_field.__class__.__name__)
+                        if nested_field.count() == 1:
+                            nested_field = nested_field[0]
+                            if nested_field:
+                                field_serializer = MrsFieldSerializer(nested_field)
+                                self.fields.append({'name': _field.name + '__' + _nested_field.name,
+                                                    'display': _nested_field.verbose_name,
+                                                    'isRelation': _nested_field.is_relation,
+                                                    'meta': field_serializer.data})
 
             except AttributeError as e:
                 print(e)
