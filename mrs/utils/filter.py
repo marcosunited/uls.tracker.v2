@@ -1,4 +1,5 @@
 from django.apps import apps
+from django.core.exceptions import FieldError
 from django.db.models import Lookup, CharField, TextField
 from django.db.models.fields import Field
 
@@ -91,7 +92,6 @@ class ModelMetaView(APIView):
                                                     'display': _nested_field.verbose_name,
                                                     'isRelation': _nested_field.is_relation,
                                                     'meta': field_serializer.data})
-
             except AttributeError as e:
                 print(e)
 
@@ -109,13 +109,11 @@ class FilteredModelViewSet(viewsets.ModelViewSet):
                 FilteredModelViewSet.operators.update({operator.code: operator.django_lookup})
 
         query_set = super().get_queryset()
-
         if self.request.method == 'POST':
             try:
                 query_list = self.request.data["query"]
             except KeyError:
                 return query_set
-
             try:
                 order_by = self.request.data["orderBy"]
             except KeyError:
@@ -129,27 +127,26 @@ class FilteredModelViewSet(viewsets.ModelViewSet):
                     query_set = query_set.filter(**kwargs)
             if order_by:
                 query_set.order_by(order_by)
+        try:
             return query_set.filter(is_deleted=False)
-
-        return query_set.filter(is_deleted=False)
+        except FieldError:
+            return query_set
 
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
-
     def __init__(self, *args, **kwargs):
         super(DynamicFieldsModelSerializer, self).__init__(*args, **kwargs)
         try:
             fields = self.context['request'].query_params.get('fields')
-
             if fields:
                 fields = fields.split(',')
-                # Drop any fields that are not specified in the `fields` argument.
                 allowed = set(fields)
                 existing = set(self.fields.keys())
                 for field_name in existing - allowed:
                     self.fields.pop(field_name)
         except Exception as e:
             print(e)
+
 
 class QueryRouter(DefaultRouter):
     routes = [

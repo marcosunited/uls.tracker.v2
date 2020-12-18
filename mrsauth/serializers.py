@@ -35,7 +35,6 @@ class UsersSerializer(serializers.ModelSerializer):
                   'firstName',
                   'lastName',
                   'nick_name',
-                  'salt',
                   'statusId',
                   'createdDate',
                   'updatedDate',

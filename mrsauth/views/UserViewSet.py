@@ -8,6 +8,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework import status, permissions
 from rest_framework.views import APIView
 
+from mrs.utils.filter import FilteredModelViewSet
 from ..models import User
 from ..serializers import UsersSerializer, GroupsSerializer
 from mrs.utils.response import ResponseHttp
@@ -50,7 +51,6 @@ class UserInit(APIView):
             r = user_serializer.validated_data
             r["email"] = r["nick_name"]
             r.pop("nick_name")
-            r.pop("salt")
 
             return JsonResponse(r, status=status.HTTP_201_CREATED)
         return JsonResponse(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -66,7 +66,6 @@ class UserDetail(APIView):
             r = user_serializer.data
             r["email"] = r["nick_name"]
             r.pop("nick_name")
-            r.pop("salt")
             return JsonResponse({'result': r, 'error': ''}, status=HTTP_200_OK)
         except User.DoesNotExist:
             result = ResponseHttp(error='The user does not exist').result
@@ -139,3 +138,8 @@ class UserFilter(APIView):
             return JsonResponse(ResponseHttp(error='The item does not exist').result, status=HTTP_404_NOT_FOUND)
         except Exception as error:
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class UserFilteredView(FilteredModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UsersSerializer

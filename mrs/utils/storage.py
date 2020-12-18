@@ -23,6 +23,7 @@ def get_upload_path(instance, filename):
                         + '_' + instance.file_sequence
                         + '_' + filename)
 
+
 class FileDocument(models.Model):
     id = models.AutoField(primary_key=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING,

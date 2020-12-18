@@ -54,8 +54,9 @@ class ContractFrequenciesSerializer(serializers.ModelSerializer):
 
 
 class ContractsSerializer(serializers.ModelSerializer):
-    contract_frequency = PrimaryKeyRelatedField(many=False, queryset=ContractFrequency.objects.all())
-    contact = PrimaryKeyRelatedField(many=False, queryset=Contact.objects.all())
+    contract_mtn_frequency = PrimaryKeyRelatedField(many=False, queryset=ContractFrequency.objects.all())
+    contact = ContactsSerializer(many=False)
+    status = PrimaryKeyRelatedField(many=False, queryset=ProcessTypeStatus.objects.all())
 
     class Meta:
         model = Contract
@@ -68,10 +69,32 @@ class ContractsSerializer(serializers.ModelSerializer):
                   'reactive_datetime',
                   'cancel_datetime',
                   'price',
-                  'frequency_mtn_id',
                   'contact',
-                  'contract_frequency',
-                  'notes')
+                  'contract_mtn_frequency',
+                  'notes',
+                  'status')
+
+    def create(self, validated_data):
+        contact_data = validated_data.pop('contact')
+        contact = Contact.objects.create(**contact_data)
+        contract = Contract.objects.create(contact=contact, **validated_data)
+        return contract
+
+    def update(self, instance, validated_data):
+        contact_data = validated_data.pop('contact')
+        Contact.objects.update(**contact_data)
+        instance.name = validated_data.get('name', instance.name)
+        instance.is_active = validated_data.get('is_active', instance.is_active)
+        instance.start_datetime = validated_data.get('start_datetime', instance.start_datetime)
+        instance.end_datetime = validated_data.get('end_datetime', instance.end_datetime)
+        instance.stand_by_datetime = validated_data.get('stand_by_datetime', instance.stand_by_datetime)
+        instance.reactive_datetime = validated_data.get('reactive_datetime', instance.reactive_datetime)
+        instance.cancel_datetime = validated_data.get('cancel_datetime', instance.cancel_datetime)
+        instance.price = validated_data.get('price', instance.price)
+        instance.notes = validated_data.get('notes', instance.notes)
+        instance.status = validated_data.get('status', instance.status)
+        instance.save()
+        return instance
 
 
 class LiftsSerializer(serializers.ModelSerializer):
@@ -99,6 +122,7 @@ class LiftsSerializer(serializers.ModelSerializer):
 class AgentsSerializer(serializers.ModelSerializer):
     contact = ContactsSerializer(many=False)
     project = PrimaryKeyRelatedField(many=False, queryset=Project.objects.all())
+
     class Meta:
         model = Agent
         fields = ('id',
@@ -123,9 +147,8 @@ class AgentsSerializer(serializers.ModelSerializer):
 
 class JobsSerializer(DynamicFieldsModelSerializer):
     contract = PrimaryKeyRelatedField(many=False, queryset=Contract.objects.all())
-    contact = PrimaryKeyRelatedField(many=False, queryset=Contact.objects.all())
     project = PrimaryKeyRelatedField(many=False, queryset=Project.objects.all())
-    agent = AgentsSerializer(many=False)
+    agent = PrimaryKeyRelatedField(many=False, queryset=Agent.objects.all())
     round = PrimaryKeyRelatedField(many=False, queryset=Round.objects.all())
     lifts = LiftsSerializer(many=True, read_only=True, source='lift_set')
 
@@ -134,15 +157,22 @@ class JobsSerializer(DynamicFieldsModelSerializer):
         fields = ('id',
                   'number',
                   'name',
-                  'contact',
                   'contract',
-                  'project',
                   'agent',
                   'round',
-                  'lifts',
+                  'floors',
+                  'postcode',
+                  'key_access_details',
                   'notes',
+                  'position',
+                  'address',
                   'suburb',
-                  'address')
+                  'group',
+                  'owner_details',
+                  'status',
+                  'documents',
+                  'project',
+                  'lifts')
 
 
 class TitlesSerializer(serializers.ModelSerializer):

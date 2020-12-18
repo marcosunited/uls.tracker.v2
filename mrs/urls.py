@@ -13,7 +13,7 @@ from mrs.utils.filter import QueryRouter, ModelMetaView
 from mrs.views import BusinessViewSets
 
 from mrs.views.BusinessViewSets import *
-
+from mrsauth.views import UserFilteredView
 
 router = QueryRouter()
 
@@ -33,6 +33,9 @@ router.register(r'lifts', LiftViewSet)
 router.register(r'notes', NoteViewSet)
 
 router.register(r'rules', RulesViewSet)
+
+router.register(r'users', UserFilteredView)
+
 
 urlpatterns = [
     # Django admin urls
@@ -54,6 +57,11 @@ urlpatterns = [
     url(r'^api/v1/profiles/(?P<pk_profile>[0-9]+)/projects/(?P<pk_project>[0-9]+)$',
         BusinessViewSets.ProfileProjectRelationView.as_view()),
 
+    # jobs - lifts
+    url(r'^api/v1/jobs/(?P<pk_job>[0-9]+)/lifts/(?P<pk_lift>[0-9]+)$',
+        BusinessViewSets.JobLiftRelationView.as_view()),
+
+
     # technicians - jobs
     url(r'^api/v1/technicians/(?P<pk_technician>[0-9]+)/getJobs$',
         BusinessViewSets.TechnicianJobsRelationView.as_view()),
@@ -61,6 +69,4 @@ urlpatterns = [
     # reports
     url(r'^api/v1/reports/(?P<report_id>[0-9]+)/(?P<model_pk>[0-9]+)/run$',
         ReportsViewSet.ReportsView.as_view()),
-
-
 ]

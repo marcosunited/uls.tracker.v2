@@ -29,7 +29,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     lastName = models.CharField(max_length=30, db_column="last_name")
     nick_name = models.EmailField(max_length=70, db_column="nick_name", unique=True)
     password = models.TextField()
-    salt = models.TextField(blank=True, null=True)
+    # salt = models.TextField(blank=True, null=True)
     authentication_provider = models.CharField(max_length=30, db_column="auth_provider", blank=True, null=True)
     statusId = models.IntegerField(db_column="state_id")
     createdDate = models.FloatField(blank=True, null=True, db_column="created")

@@ -85,7 +85,7 @@ class ProfileViewSet(FilteredModelViewSet):
     serializer_class = ProjectsSerializer
 
 
-# /profiles/idProfile/project/idProject/
+# /profiles/idProfile/projects/idProject/
 class ProfileProjectRelationView(APIView):
     def post(self, request, pk_profile, pk_project):
         try:
@@ -115,6 +115,36 @@ class ProfileProjectRelationView(APIView):
         except Exception as error:
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+# /jobs/idJob/lifts/idLift/
+class JobLiftRelationView(APIView):
+    def post(self, request, pk_job, pk_lift):
+        try:
+            job = Job.objects.get(id=pk_job)
+            lift = Lift.objects.get(id=pk_lift)
+            job.lift_set.add(lift)
+            job_serializer = JobsSerializer(job)
+            return JsonResponse({'result': job_serializer.data, 'error': ''})
+        except Job.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The job does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Lift.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The lift does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, pk_job, pk_lift):
+        try:
+            job = Job.objects.get(id=pk_job)
+            lift = Lift.objects.get(id=pk_lift)
+            job.lift_set.remove(lift.id)
+            job_serializer = JobsSerializer(job)
+            return JsonResponse({'result': job_serializer.data, 'error': ''})
+        except Job.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The job does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Lift.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The lift does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
 class AgentViewSet(FilteredModelViewSet):
     queryset = Agent.objects.all()

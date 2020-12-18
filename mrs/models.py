@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from mrs.rules.Actions import JobActions
 from mrs.rules.Variables import JobVariables
-from mrs.utils.storage import FileDocument
+import mrs.utils.storage
 from mrsauth.models import User
 
 
@@ -375,9 +375,8 @@ class Contract(MrsModel):
     reactive_datetime = models.DateTimeField(db_column='reactiveDatetime', blank=True, null=True)
     cancel_datetime = models.CharField(db_column='cancelDatetime', max_length=255, blank=True, null=True)
     price = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True)
-    frequency_mtn_id = models.IntegerField(db_column='frequencyMtnId', unique=True, blank=True, null=True)
     contact = models.OneToOneField(Contact, on_delete=models.CASCADE, blank=True, null=True)
-    contract_frequency = models.OneToOneField(ContractFrequency, on_delete=models.CASCADE, blank=True, null=True)
+    contract_mtn_frequency = models.OneToOneField(ContractFrequency, on_delete=models.CASCADE, blank=True, null=True)
     notes = models.CharField(max_length=255, blank=True, null=True)
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', default='1')
 
@@ -466,8 +465,6 @@ class Job(MrsModel):
     id = models.AutoField(primary_key=True)
     number = models.IntegerField(verbose_name='Number')
     name = models.CharField(max_length=50, verbose_name='Name')
-    contact = models.ForeignKey(Contact, on_delete=models.DO_NOTHING, verbose_name='Contact', db_column='contactId')
-    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
     contract = models.ForeignKey(Contract, on_delete=models.DO_NOTHING, db_column='contractId')
     agent = models.ForeignKey(Agent, on_delete=models.DO_NOTHING, db_column='agentId')
     round = models.ForeignKey(Round, on_delete=models.DO_NOTHING, db_column='roundId')
@@ -481,7 +478,8 @@ class Job(MrsModel):
     group = models.CharField(db_column='group', max_length=100, blank=True, null=True)
     owner_details = models.CharField(db_column='ownerDetails', max_length=250, blank=True, null=True)
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', default='1')
-    documents = models.ManyToManyField(FileDocument)
+    documents = models.ManyToManyField(mrs.utils.storage.FileDocument)
+    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
 
     class Meta:
         managed = True
