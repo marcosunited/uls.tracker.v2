@@ -7,7 +7,7 @@ from mrsauth.views import UserViewSet, login, AuthorizationViewSets
 from mrsauth.views.AuthorizationViewSets import *
 
 router = routers.DefaultRouter()
-router.register(r'groups', GroupViewSet, basename='groups')
+router.register(r'auth_groups', GroupViewSet, basename='groups')
 router.register(r'permissions', PermissionViewSet)
 router.register(r'profiles', ProfileViewSet)
 
@@ -28,7 +28,7 @@ urlpatterns = [
     url(r'^api/v1/user/filter$', UserViewSet.UserFilter.as_view()),
 
     # Group - User
-    url(r'^api/v1/group/(?P<pk_group>[0-9]+)/user/(?P<pk_user>[0-9]+)$', AuthorizationViewSets.GroupUserRelationView.as_view()),
+    url(r'^api/v1/auth_group/(?P<pk_group>[0-9]+)/user/(?P<pk_user>[0-9]+)$', AuthorizationViewSets.GroupUserRelationView.as_view()),
 
     # Authentication-authorization router managed urls
     url(r'^api/v1/', include(router.urls)),

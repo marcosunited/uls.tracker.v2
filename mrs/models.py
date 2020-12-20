@@ -101,6 +101,7 @@ class ServiceTarget(MrsModel):
     def __str__(self):
         return self.name
 
+
 class Task(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
@@ -200,7 +201,7 @@ class ProcessTypeStatus(MrsModel):
         db_table = 'process_types_status'
 
     def __str__(self):
-        return self.name + " (" + self.process_type.name + " - " +  self.project.name + ")"
+        return self.name + " (" + self.process_type.name + " - " + self.project.name + ")"
 
 
 class Title(MrsModel):
@@ -379,6 +380,7 @@ class Contract(MrsModel):
     contract_mtn_frequency = models.OneToOneField(ContractFrequency, on_delete=models.CASCADE, blank=True, null=True)
     notes = models.CharField(max_length=255, blank=True, null=True)
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', default='1')
+    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
 
     class Meta:
         managed = True
@@ -461,6 +463,19 @@ class Agent(MrsModel):
         return self.name + " - " + self.contact.first_name + " " + self.contact.last_name
 
 
+class Group(MrsModel):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50, verbose_name='Name')
+    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
+
+    class Meta:
+        managed = True
+        db_table = 'groups'
+
+    def __str__(self):
+        return self.name
+
+
 class Job(MrsModel):
     id = models.AutoField(primary_key=True)
     number = models.IntegerField(verbose_name='Number')
@@ -475,7 +490,7 @@ class Job(MrsModel):
     position = models.TextField(blank=True, null=True)
     address = models.CharField(db_column='address', max_length=100, blank=True, null=True)
     suburb = models.CharField(db_column='suburb', max_length=100, blank=True, null=True)
-    group = models.CharField(db_column='group', max_length=100, blank=True, null=True)
+    group = models.ForeignKey(Group, on_delete=models.DO_NOTHING, db_column='groupId', blank=True, null=True)
     owner_details = models.CharField(db_column='ownerDetails', max_length=250, blank=True, null=True)
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', default='1')
     documents = models.ManyToManyField(mrs.utils.storage.FileDocument)
@@ -613,8 +628,6 @@ class WorkorderLift(MrsModel):
     class Meta:
         managed = True
         db_table = 'workorders_lifts'
-
-
 
 
 class Workorder(MrsModel):

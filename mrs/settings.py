@@ -88,10 +88,10 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
-    'DATE_INPUT_FORMATS': ["%d-%m-%Y"],
-    'DATE_FORMAT': "%d-%m-%Y",
-    'DATETIME_INPUT_FORMATS': ["%d-%m-%Y %H:%M:%S"],
-    'DATETIME_FORMAT': "%d-%m-%Y %H:%M:%S",
+    'DATE_INPUT_FORMATS': ['iso-8601'],
+    'DATE_FORMAT': 'iso-8601',
+    'DATETIME_INPUT_FORMATS': ['iso-8601'],
+    'DATETIME_FORMAT': 'iso-8601',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ),

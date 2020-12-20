@@ -1,19 +1,10 @@
 
 .idea/
+.gradle/
 mrs/__pycache__/
 mrs/migrations/
 mrs/mrs.iml
 mrsauth/migrations/
 *.pyc
 *.iml
-*.pyc
-*.iml
-*.iml
-*.pyc
-*.iml
-*.pyc
-*.pyc
-*.pyc
-*.pyc
-*.pyc
-*.pyc
+

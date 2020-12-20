@@ -57,6 +57,7 @@ class ContractsSerializer(serializers.ModelSerializer):
     contract_mtn_frequency = PrimaryKeyRelatedField(many=False, queryset=ContractFrequency.objects.all())
     contact = ContactsSerializer(many=False)
     status = PrimaryKeyRelatedField(many=False, queryset=ProcessTypeStatus.objects.all())
+    project = PrimaryKeyRelatedField(many=False, queryset=Project.objects.all())
 
     class Meta:
         model = Contract
@@ -72,7 +73,8 @@ class ContractsSerializer(serializers.ModelSerializer):
                   'contact',
                   'contract_mtn_frequency',
                   'notes',
-                  'status')
+                  'status',
+                  'project')
 
     def create(self, validated_data):
         contact_data = validated_data.pop('contact')
@@ -148,6 +150,7 @@ class AgentsSerializer(serializers.ModelSerializer):
 class JobsSerializer(DynamicFieldsModelSerializer):
     contract = PrimaryKeyRelatedField(many=False, queryset=Contract.objects.all())
     project = PrimaryKeyRelatedField(many=False, queryset=Project.objects.all())
+    group = PrimaryKeyRelatedField(many=False, queryset=Group.objects.all())
     agent = PrimaryKeyRelatedField(many=False, queryset=Agent.objects.all())
     round = PrimaryKeyRelatedField(many=False, queryset=Round.objects.all())
     lifts = LiftsSerializer(many=True, read_only=True, source='lift_set')
@@ -173,6 +176,17 @@ class JobsSerializer(DynamicFieldsModelSerializer):
                   'documents',
                   'project',
                   'lifts')
+
+
+class GroupsSerializer(serializers.ModelSerializer):
+    jobs = JobsSerializer(many=True, read_only=True, source='job_set')
+
+    class Meta:
+        model = Group
+        fields = ('id',
+                  'name',
+                  'project',
+                  'jobs')
 
 
 class TitlesSerializer(serializers.ModelSerializer):

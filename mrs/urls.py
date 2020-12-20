@@ -31,6 +31,7 @@ router.register(r'agents', AgentViewSet)
 router.register(r'technicians', TechnicianViewSet)
 router.register(r'lifts', LiftViewSet)
 router.register(r'notes', NoteViewSet)
+router.register(r'groups', GroupViewSet)
 
 router.register(r'rules', RulesViewSet)
 
