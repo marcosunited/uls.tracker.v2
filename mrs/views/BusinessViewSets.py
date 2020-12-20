@@ -146,9 +146,11 @@ class JobLiftRelationView(APIView):
         except Exception as error:
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class GroupViewSet(FilteredModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupsSerializer
+
 
 class AgentViewSet(FilteredModelViewSet):
     queryset = Agent.objects.all()
@@ -198,3 +200,12 @@ class NoteViewSet(FilteredModelViewSet):
     queryset = Note.objects.all()
     serializer_class = NotesSerializer
 
+
+class ProcedureViewSet(FilteredModelViewSet):
+    queryset = Procedure.objects.all()
+    serializer_class = ProceduresSerializer
+
+
+class ProcedureViewSet(FilteredModelViewSet):
+    queryset = Procedure.objects.all()
+    serializer_class = ProceduresSerializer

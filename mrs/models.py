@@ -130,19 +130,6 @@ class Procedure(MrsModel):
         return self.name
 
 
-class Month(MrsModel):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=50)
-
-    class Meta:
-        managed = True
-        db_table = 'months'
-        app_label = 'mrs'
-
-    def __str__(self):
-        return self.name
-
-
 class Country(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=70)
@@ -752,7 +739,6 @@ class MaintenancePlan(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
-    procedures = models.ManyToManyField(Procedure)
 
     class Meta:
         managed = True
@@ -762,7 +748,7 @@ class MaintenancePlan(MrsModel):
 class ScheduleEntry(MrsModel):
     id = models.AutoField(primary_key=True)
     notes = models.CharField(max_length=255, blank=True, null=True)
-    lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
+    maintenance_plan = models.ForeignKey(MaintenancePlan, on_delete=models.CASCADE, db_column='planId')
     procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, db_column='taskId')
     schedule_date = models.DateField(db_column='scheduleDate')
     workorder = models.OneToOneField(Workorder, on_delete=models.CASCADE, primary_key=False)

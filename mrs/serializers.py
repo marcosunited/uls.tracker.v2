@@ -23,15 +23,6 @@ class MetadataValuesSerializer(serializers.ModelSerializer):
                   'value',)
 
 
-class ProjectsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Project
-        fields = ('id',
-                  'name',
-                  'is_active',
-                  'description',)
-
-
 class ContactsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
@@ -234,6 +225,14 @@ class ProfilesSerializer(serializers.ModelSerializer):
                   'avatar')
 
 
+class ProjectProfilesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ('id',
+                  'fullname'
+                  )
+
+
 class TechniciansSerializer(serializers.ModelSerializer):
     profile = ProfilesSerializer(many=False)
 
@@ -301,12 +300,36 @@ class ProceduresSerializer(serializers.ModelSerializer):
     tasks = TasksSerializer(many=True)
 
     class Meta:
-        model = Fault
+        model = Procedure
         fields = ('id',
                   'name',
                   'description',
                   'tasks',
                   'service_target')
+
+
+class MaintenancePlansSerializer(serializers.ModelSerializer):
+    lift = PrimaryKeyRelatedField(many=False, queryset=Lift.objects.all())
+
+    class Meta:
+        model = MaintenancePlan
+        fields = ('id',
+                  'name',
+                  'lift')
+
+
+class ScheduleEntriesSerializer(serializers.ModelSerializer):
+    maintenance_plan = PrimaryKeyRelatedField(many=False, queryset=MaintenancePlan.objects.all())
+    procedure = PrimaryKeyRelatedField(many=False, queryset=Procedure.objects.all())
+
+    class Meta:
+        model = ScheduleEntry
+        fields = ('id',
+                  'notes',
+                  'maintenance_plan',
+                  'procedure',
+                  'schedule_date',
+                  'workorder')
 
 
 class WorkordersSerializer(serializers.ModelSerializer):
@@ -325,6 +348,18 @@ class ReportHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportHistory
         fields = '__all__'
+
+
+class ProjectsSerializer(serializers.ModelSerializer):
+    profiles = ProjectProfilesSerializer(many=True, source='profile_set')
+
+    class Meta:
+        model = Project
+        fields = ('id',
+                  'name',
+                  'is_active',
+                  'description',
+                  'profiles')
 
 
 """
