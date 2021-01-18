@@ -73,7 +73,7 @@ class UsersHistoryLogin(models.Model):
     device_imei = models.CharField(db_column='deviceIMEI', max_length=255, blank=True, null=True)
     user_agent = models.CharField(db_column='userAgent', max_length=255, blank=True, null=True)
     position = models.TextField(blank=True, null=True)
-    login_datetime = models.DateTimeField(db_column='loginDatetime', default=timezone.now())
+    login_datetime = models.DateTimeField(db_column='loginDatetime', default=timezone.now)
 
     class Meta:
         managed = True

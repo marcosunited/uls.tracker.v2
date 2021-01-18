@@ -6,6 +6,16 @@ from mrs.models import *
 from mrs.utils.filter import DynamicFieldsModelSerializer
 
 
+class JhaItemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JhaItem
+        fields = ('id',
+                  'name',
+                  'description',
+                  'is_active',
+                  'is_ticked_default',)
+
+
 class MetadataTypesSerializer(serializers.ModelSerializer):
     class Meta:
         model = MetadataType
@@ -285,7 +295,21 @@ class FaultsSerializer(serializers.ModelSerializer):
         model = Fault
         fields = ('id',
                   'name',
+                  'full_name',
                   'description')
+
+
+class ServiceTargetSerializer(serializers.ModelSerializer):
+    corrections = CorrectionsSerializer(many=True, source='correction_set')
+    faults = FaultsSerializer(many=True, source='fault_set')
+
+    class Meta:
+        model = ServiceTarget
+        fields = ('id',
+                  'name',
+                  'key_name',
+                  'corrections',
+                  'faults')
 
 
 class TasksSerializer(serializers.ModelSerializer):
@@ -360,6 +384,46 @@ class ProjectsSerializer(serializers.ModelSerializer):
                   'is_active',
                   'description',
                   'profiles')
+
+
+class OperationsSerializer(serializers.ModelSerializer):
+    procedure = PrimaryKeyRelatedField(many=False,
+                                       queryset=Procedure.objects.all())
+    schedule_entry = PrimaryKeyRelatedField(many=False,
+                                            queryset=ScheduleEntry.objects.all())
+    workorder = PrimaryKeyRelatedField(many=False,
+                                       queryset=Workorder.objects.all())
+    status = PrimaryKeyRelatedField(many=False,
+                                    queryset=ProcessTypeStatus.objects.all())
+    jha_check_list = JhaItemsSerializer(many=True)
+
+    class Meta:
+        model = Operation
+        fields = ('id',
+                  'type',
+                  'notes',
+                  'procedure',
+                  'schedule_entry',
+                  'workorder',
+                  'start_datetime',
+                  'end_datetime',
+                  'status',
+                  'jha_check_list')
+
+
+class ActionsSerializer(serializers.ModelSerializer):
+    operation = PrimaryKeyRelatedField(many=False,
+                                       queryset=Operation.objects.all())
+    task = PrimaryKeyRelatedField(many=False, queryset=Task.objects.all())
+    status = PrimaryKeyRelatedField(many=False,
+                                    queryset=ProcessTypeStatus.objects.all())
+
+    class Meta:
+        model = Action
+        fields = ('id',
+                  'operation',
+                  'task',
+                  'status')
 
 
 """

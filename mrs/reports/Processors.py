@@ -1,6 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
 
-from mrs.models import Report
 from mrs.utils.model import to_dict
 
 

@@ -66,9 +66,7 @@ class MrsFieldSerializer(serializers.ModelSerializer):
 
 class ModelMetaView(APIView):
     fields = []
-
     def get(self, request, model):
-
         model = apps.get_model('mrs', model)
         for _field in model._meta.fields:
             try:
@@ -93,7 +91,7 @@ class ModelMetaView(APIView):
                                                     'isRelation': _nested_field.is_relation,
                                                     'meta': field_serializer.data})
             except AttributeError as e:
-                print(e)
+                pass
 
         response = ObjectResponse(self.fields)
         return Response(response.result, status=HTTP_200_OK)
@@ -145,7 +143,7 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
                 for field_name in existing - allowed:
                     self.fields.pop(field_name)
         except Exception as e:
-            print(e)
+            pass
 
 
 class QueryRouter(DefaultRouter):

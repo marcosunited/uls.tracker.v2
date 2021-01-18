@@ -24,7 +24,7 @@ router.register(r'projects', ProjectViewSet)
 router.register(r'profiles', ProfileViewSet)
 router.register(r'contacts', ContactViewSet)
 router.register(r'contracts', ContractViewSet)
-router.register(r'contractsfrequencies', ContractFrequencyViewSet)
+router.register(r'contract_frequencies', ContractFrequencyViewSet)
 router.register(r'jobs', JobViewSet)
 router.register(r'rounds', RoundViewSet)
 router.register(r'agents', AgentViewSet)
@@ -32,9 +32,17 @@ router.register(r'technicians', TechnicianViewSet)
 router.register(r'lifts', LiftViewSet)
 router.register(r'notes', NoteViewSet)
 router.register(r'groups', GroupViewSet)
-
+router.register(r'procedures', ProcedureViewSet)
+router.register(r'tasks', TaskViewSet)
+router.register(r'operations', OperationViewSet)
+router.register(r'actions', ActionViewSet)
+router.register(r'maintenance_plans', MaintenancePlanViewSet)
+router.register(r'schedule_entries', ScheduleEntryViewSet)
+router.register(r'jha_items', JhaItemViewSet)
+router.register(r'corrections', CorrectionViewSet)
+router.register(r'faults', FaultViewSet)
+router.register(r'service_targets', ServiceTargetViewSet)
 router.register(r'rules', RulesViewSet)
-
 router.register(r'users', UserFilteredView)
 
 
@@ -62,6 +70,9 @@ urlpatterns = [
     url(r'^api/v1/jobs/(?P<pk_job>[0-9]+)/lifts/(?P<pk_lift>[0-9]+)$',
         BusinessViewSets.JobLiftRelationView.as_view()),
 
+    # procedures - tasks
+    url(r'^api/v1/procedures/(?P<pk_procedure>[0-9]+)/tasks/(?P<pk_task>[0-9]+)$',
+        BusinessViewSets.ProcedureTaskRelationView.as_view()),
 
     # technicians - jobs
     url(r'^api/v1/technicians/(?P<pk_technician>[0-9]+)/getJobs$',
@@ -70,4 +81,9 @@ urlpatterns = [
     # reports
     url(r'^api/v1/reports/(?P<report_id>[0-9]+)/(?P<model_pk>[0-9]+)/run$',
         ReportsViewSet.ReportsView.as_view()),
+
+    # maintenance
+    url(r'^api/v1/maintenances/(?P<pk_lift>[0-9]+)/generate_plan$',
+        BusinessViewSets.GenerateMaintenancePlanView.as_view()),
+
 ]

@@ -1,12 +1,19 @@
+from django.db import transaction
 from django.http import JsonResponse
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 from rest_framework.views import APIView
 
 from mrs.serializers import *
+from mrs.services.maintenanceService import MaintenanceService
 from mrs.utils.cache import CachedModelViewSet
 from mrs.utils.filter import FilteredModelViewSet
 from mrs.utils.model import LogicalDeleteModelViewSet
 from mrs.utils.response import ResponseHttp
+
+
+class JhaItemViewSet(FilteredModelViewSet, CachedModelViewSet):
+    queryset = JhaItem.objects.all()
+    serializer_class = JhaItemsSerializer
 
 
 class MetadataTypeViewSet(FilteredModelViewSet, CachedModelViewSet):
@@ -196,6 +203,11 @@ class FaultViewSet(FilteredModelViewSet):
     serializer_class = FaultsSerializer
 
 
+class ServiceTargetViewSet(FilteredModelViewSet):
+    queryset = ServiceTarget.objects.all()
+    serializer_class = ServiceTargetSerializer
+
+
 class NoteViewSet(FilteredModelViewSet):
     queryset = Note.objects.all()
     serializer_class = NotesSerializer
@@ -206,6 +218,75 @@ class ProcedureViewSet(FilteredModelViewSet):
     serializer_class = ProceduresSerializer
 
 
-class ProcedureViewSet(FilteredModelViewSet):
-    queryset = Procedure.objects.all()
-    serializer_class = ProceduresSerializer
+class OperationViewSet(FilteredModelViewSet):
+    queryset = Operation.objects.all()
+    serializer_class = OperationsSerializer
+
+
+class ActionViewSet(FilteredModelViewSet):
+    queryset = Action.objects.all()
+    serializer_class = ActionsSerializer
+
+
+# /procedures/idProcedure/tasks/idTask/
+class ProcedureTaskRelationView(APIView):
+    def post(self, request, pk_procedure, pk_task):
+        try:
+            procedure = Procedure.objects.get(id=pk_procedure)
+            task = Task.objects.get(id=pk_task)
+            procedure.tasks.add(task)
+            procedure_serializer = ProceduresSerializer(procedure)
+            return JsonResponse({'result': procedure_serializer.data, 'error': ''})
+        except Procedure.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The procedure does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Task.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The task does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, pk_procedure, pk_task):
+        try:
+            procedure = Procedure.objects.get(id=pk_procedure)
+            task = Task.objects.get(id=pk_task)
+            procedure.tasks.remove(task)
+            procedure_serializer = ProceduresSerializer(procedure)
+            return JsonResponse({'result': procedure_serializer.data, 'error': ''})
+        except Procedure.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The procedure does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Task.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The task does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class TaskViewSet(FilteredModelViewSet):
+    queryset = Task.objects.all()
+    serializer_class = TasksSerializer
+
+
+class MaintenancePlanViewSet(FilteredModelViewSet):
+    queryset = MaintenancePlan.objects.all()
+    serializer_class = MaintenancePlansSerializer
+
+
+class GenerateMaintenancePlanView(APIView):
+    @transaction.atomic
+    def post(self, request, pk_lift):
+        try:
+            maintenance_service = MaintenanceService()
+            plan = maintenance_service.generate_plan(pk_lift)
+            return JsonResponse({'result': plan, 'error': ''})
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @transaction.atomic
+    def delete(self, request, pk_lift):
+        try:
+            return JsonResponse({'result': pk_lift, 'error': ''})
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ScheduleEntryViewSet(FilteredModelViewSet):
+    queryset = ScheduleEntry.objects.all()
+    serializer_class = ScheduleEntriesSerializer
