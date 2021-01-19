@@ -4,6 +4,12 @@ from mrs.models import Lift, MaintenancePlan, ScheduleEntry, Procedure
 
 
 class MaintenanceService:
+
+    def generate_year_plan(self, lift_id):
+        lift = Lift.objects.get(id=lift_id)
+        job = lift.job
+
+
     def generate_plan(self, lift_id, name):
         lift = Lift.objects.get(id=lift_id)
         job = lift.job
