@@ -1,3 +1,4 @@
+from auditlog.registry import auditlog
 from django.contrib import admin
 
 from django.apps import apps
@@ -10,8 +11,12 @@ def register_models(*app_list):
         for model in app_models:
             try:
                 admin.site.register(model)
+                auditlog.register(model)
             except AlreadyRegistered:
                 pass
 
 
 register_models('mrs')
+
+
+

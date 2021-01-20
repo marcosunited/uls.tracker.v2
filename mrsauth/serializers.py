@@ -4,22 +4,20 @@ from rest_framework import serializers
 from rest_framework.relations import PrimaryKeyRelatedField
 
 from mrs.models import Profile
+from mrs.serializers import ProfilesSerializer
 from mrsauth.models import User
 
 
 class PermissionsSerializer(serializers.ModelSerializer):
-    content_type = PrimaryKeyRelatedField(many=False, queryset=ContentType.objects.all())
 
     class Meta:
         model = Permission
         fields = ('id',
-                  'name',
-                  'content_type',
-                  'codename')
+                  'name')
 
 
 class GroupsSerializer(serializers.ModelSerializer):
-    permissions = PrimaryKeyRelatedField(many=True, queryset=Permission.objects.all())
+    permissions = PermissionsSerializer(many=True)
 
     class Meta:
         model = Group
@@ -28,20 +26,8 @@ class GroupsSerializer(serializers.ModelSerializer):
                   'permissions')
 
 
-class ProfilesSerializer(serializers.ModelSerializer):
-    user = PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
-
-    class Meta:
-        model = Profile
-        fields = ('id',
-                  'fullname',
-                  'phone',
-                  'email',
-                  'user')
-
-
 class UsersSerializer(serializers.ModelSerializer):
-    profiles = ProfilesSerializer(many=True, read_only=True)
+    profile = ProfilesSerializer(many=False, read_only=True)
     groups = GroupsSerializer(many=True, read_only=True)
 
     class Meta:
@@ -49,14 +35,14 @@ class UsersSerializer(serializers.ModelSerializer):
                   'firstName',
                   'lastName',
                   'nick_name',
-                  'salt',
                   'statusId',
                   'createdDate',
                   'updatedDate',
                   'password',
                   'date_of_birth',
-                  'profiles',
+                  'profile',
                   'groups')
+
         model = User
         extra_kwargs = {'password': {'write_only': True}}
         read_only_fields = ('auth_token',)
