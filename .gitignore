@@ -1,6 +1,11 @@
 
 .idea/
+.gradle/
 mrs/__pycache__/
 mrs/migrations/
 mrs/mrs.iml
 mrsauth/migrations/
+mrsauth/__pycache__/
+*.pyc
+*.iml
+
