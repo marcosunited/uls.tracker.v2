@@ -212,29 +212,14 @@ class NoteViewSet(FilteredModelViewSet):
     queryset = Note.objects.all()
     serializer_class = NotesSerializer
 
-
-class ProcedureViewSet(FilteredModelViewSet):
-    queryset = Procedure.objects.all()
-    serializer_class = ProceduresSerializer
-
-
-class OperationViewSet(FilteredModelViewSet):
-    queryset = Operation.objects.all()
-    serializer_class = OperationsSerializer
-
-
-class ActionViewSet(FilteredModelViewSet):
-    queryset = Action.objects.all()
-    serializer_class = ActionsSerializer
-
-
+"""
 # /procedures/idProcedure/tasks/idTask/
-class ProcedureTaskRelationView(APIView):
-    def post(self, request, pk_procedure, pk_task):
+class MaintenanceMonthTaskTemplateRelationView(APIView):
+    def post(self, request, pk_maintenance_month, pk_task_template):
         try:
-            procedure = Procedure.objects.get(id=pk_procedure)
-            task = Task.objects.get(id=pk_task)
-            procedure.tasks.add(task)
+            maintenance_month = MaintenanceMonth.objects.get(id=pk_maintenance_month)
+            task_template = TaskTemplate.objects.get(id=pk_task_template)
+            maintenance_month.task_templates.add(task_template)
             procedure_serializer = ProceduresSerializer(procedure)
             return JsonResponse({'result': procedure_serializer.data, 'error': ''})
         except Procedure.DoesNotExist:
@@ -257,7 +242,7 @@ class ProcedureTaskRelationView(APIView):
             return JsonResponse(ResponseHttp(error='The task does not exist').result, status=HTTP_404_NOT_FOUND)
         except Exception as error:
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
-
+"""
 
 class TaskViewSet(FilteredModelViewSet):
     queryset = Task.objects.all()
@@ -286,7 +271,3 @@ class GenerateMaintenancePlanView(APIView):
         except Exception as error:
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-class ScheduleEntryViewSet(FilteredModelViewSet):
-    queryset = ScheduleEntry.objects.all()
-    serializer_class = ScheduleEntriesSerializer

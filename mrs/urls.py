@@ -32,12 +32,8 @@ router.register(r'technicians', TechnicianViewSet)
 router.register(r'lifts', LiftViewSet)
 router.register(r'notes', NoteViewSet)
 router.register(r'groups', GroupViewSet)
-router.register(r'procedures', ProcedureViewSet)
 router.register(r'tasks', TaskViewSet)
-router.register(r'operations', OperationViewSet)
-router.register(r'actions', ActionViewSet)
 router.register(r'maintenance_plans', MaintenancePlanViewSet)
-router.register(r'schedule_entries', ScheduleEntryViewSet)
 router.register(r'jha_items', JhaItemViewSet)
 router.register(r'corrections', CorrectionViewSet)
 router.register(r'faults', FaultViewSet)
@@ -69,10 +65,6 @@ urlpatterns = [
     # jobs - lifts
     url(r'^api/v1/jobs/(?P<pk_job>[0-9]+)/lifts/(?P<pk_lift>[0-9]+)$',
         BusinessViewSets.JobLiftRelationView.as_view()),
-
-    # procedures - tasks
-    url(r'^api/v1/procedures/(?P<pk_procedure>[0-9]+)/tasks/(?P<pk_task>[0-9]+)$',
-        BusinessViewSets.ProcedureTaskRelationView.as_view()),
 
     # technicians - jobs
     url(r'^api/v1/technicians/(?P<pk_technician>[0-9]+)/getJobs$',

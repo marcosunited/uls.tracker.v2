@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from mrs.models import Lift, MaintenancePlan, ScheduleEntry, Procedure
+from mrs.models import Lift, MaintenancePlan
 
 
 class MaintenanceService:
@@ -27,12 +27,6 @@ class MaintenanceService:
         days_delta = timedelta(days=days_frequency)
         while planed_date <= end_date:
             planed_date = planed_date + days_delta
-            procedure = Procedure.objects.get(id=2)
 
-            # add plan entry
-            plan_entry = ScheduleEntry(maintenance_plan=maintenance_plan,
-                                       procedure=procedure,
-                                       schedule_date=planed_date)
-            plan_entry.save()
 
         return days_frequency

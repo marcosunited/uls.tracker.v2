@@ -311,6 +311,24 @@ class ServiceTargetSerializer(serializers.ModelSerializer):
                   'corrections',
                   'faults')
 
+class TaskTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskTemplate
+        fields = ('id',
+                  'name',
+                  'description',
+                  'enable')
+
+
+class MaintenanceMonthSerializer(serializers.ModelSerializer):
+    tasks_template = TaskTemplateSerializer(many=True)
+    class Meta:
+        model = MaintenanceMonth
+        fields = ('id',
+                  'name',
+                  'month_number',
+                  'tasks_template')
+
 
 class TasksSerializer(serializers.ModelSerializer):
     class Meta:
@@ -320,40 +338,13 @@ class TasksSerializer(serializers.ModelSerializer):
                   'description')
 
 
-class ProceduresSerializer(serializers.ModelSerializer):
-    tasks = TasksSerializer(many=True)
-
-    class Meta:
-        model = Procedure
-        fields = ('id',
-                  'name',
-                  'description',
-                  'tasks',
-                  'service_target')
-
-
 class MaintenancePlansSerializer(serializers.ModelSerializer):
     lift = PrimaryKeyRelatedField(many=False, queryset=Lift.objects.all())
 
     class Meta:
         model = MaintenancePlan
         fields = ('id',
-                  'name',
-                  'lift')
-
-
-class ScheduleEntriesSerializer(serializers.ModelSerializer):
-    maintenance_plan = PrimaryKeyRelatedField(many=False, queryset=MaintenancePlan.objects.all())
-    procedure = PrimaryKeyRelatedField(many=False, queryset=Procedure.objects.all())
-
-    class Meta:
-        model = ScheduleEntry
-        fields = ('id',
-                  'notes',
-                  'maintenance_plan',
-                  'procedure',
-                  'schedule_date',
-                  'workorder')
+                  'name')
 
 
 class WorkordersSerializer(serializers.ModelSerializer):
@@ -384,46 +375,6 @@ class ProjectsSerializer(serializers.ModelSerializer):
                   'is_active',
                   'description',
                   'profiles')
-
-
-class OperationsSerializer(serializers.ModelSerializer):
-    procedure = PrimaryKeyRelatedField(many=False,
-                                       queryset=Procedure.objects.all())
-    schedule_entry = PrimaryKeyRelatedField(many=False,
-                                            queryset=ScheduleEntry.objects.all())
-    workorder = PrimaryKeyRelatedField(many=False,
-                                       queryset=Workorder.objects.all())
-    status = PrimaryKeyRelatedField(many=False,
-                                    queryset=ProcessTypeStatus.objects.all())
-    jha_check_list = JhaItemsSerializer(many=True)
-
-    class Meta:
-        model = Operation
-        fields = ('id',
-                  'type',
-                  'notes',
-                  'procedure',
-                  'schedule_entry',
-                  'workorder',
-                  'start_datetime',
-                  'end_datetime',
-                  'status',
-                  'jha_check_list')
-
-
-class ActionsSerializer(serializers.ModelSerializer):
-    operation = PrimaryKeyRelatedField(many=False,
-                                       queryset=Operation.objects.all())
-    task = PrimaryKeyRelatedField(many=False, queryset=Task.objects.all())
-    status = PrimaryKeyRelatedField(many=False,
-                                    queryset=ProcessTypeStatus.objects.all())
-
-    class Meta:
-        model = Action
-        fields = ('id',
-                  'operation',
-                  'task',
-                  'status')
 
 
 """

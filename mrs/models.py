@@ -33,6 +33,18 @@ class Project(MrsModel):
     def __str__(self):
         return self.name
 
+class Customer(MrsModel):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
+
+    class Meta:
+        managed = True
+        db_table = 'customers'
+
+    def __str__(self):
+        return self.name
+
 
 class MetadataType(MrsModel):
     id = models.AutoField(primary_key=True)
@@ -443,6 +455,8 @@ class Group(MrsModel):
         return self.name
 
 
+
+
 class Job(MrsModel):
     id = models.AutoField(primary_key=True)
     number = models.IntegerField(verbose_name='Number')
@@ -470,6 +484,20 @@ class Job(MrsModel):
     class RulesConf:
         variables = JobVariables
         actions = JobActions
+
+    def __str__(self):
+        return self.name
+
+
+class Site(MrsModel):
+    id = models.AutoField(primary_key=True)
+    number = models.IntegerField(verbose_name='Number')
+    name = models.CharField(max_length=50, verbose_name='Name')
+    job = models.ForeignKey(Job, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        db_table = 'sites'
 
     def __str__(self):
         return self.name
@@ -689,9 +717,9 @@ class WorkordersHistory(MrsModel):
 
 class MaintenancePlan(MrsModel):
     id = models.AutoField(primary_key=True)
+    job = models.ForeignKey(Job, on_delete=models.DO_NOTHING)
     name = models.CharField(max_length=50)
     start_datetime = DateTimeField()
-    lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
 
     class Meta:
         managed = True
@@ -715,7 +743,7 @@ class TaskTemplate(MrsModel):
 class Task(MrsModel):
     id = models.AutoField(primary_key=True)
     notes = models.CharField(max_length=255, blank=True, null=True)
-    task_template = models.ForeignKey(TaskTemplate, on_delete=models.DO_NOTHING, null=True, blank=True)
+    task_template = models.ForeignKey(TaskTemplate, on_delete=models.DO_NOTHING,    null=True, blank=True)
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId')
 
     class Meta:
@@ -723,7 +751,7 @@ class Task(MrsModel):
         db_table = 'tasks'
 
     def __str__(self):
-        return self.task_template.name
+        return self.task_template.name + ' (' + self.status.name + ')'
 
 
 class Procedure(MrsModel):
@@ -755,18 +783,24 @@ class Visit(MrsModel):
 
 class Maintenance(MrsModel):
     id = models.AutoField(primary_key=True)
-    type = models.IntegerField(default=1)  # set the entry type, 1 = entry in maintenance plan, 2 entry out of a maintenance plan
+    source = models.IntegerField(default=1)  # where was generated, 1 = maintenance plan, 2 no maintenance plan
     notes = models.ManyToManyField(Note)
     technician = models.ForeignKey(Technician, on_delete=models.DO_NOTHING)
     job = models.ForeignKey(Job, on_delete=models.DO_NOTHING)
     lifts = models.ManyToManyField(Lift)
-    # service_areas
-    # service_types
+    docket_number = models.IntegerField(blank=True, null=True)
+    service_areas = models.ManyToManyField(ServiceArea)
+    service_types = models.ManyToManyField(ServiceType)
     maintenance_plan = models.ForeignKey(MaintenancePlan, on_delete=models.DO_NOTHING, db_column='planId', null=True,
                                          blank=True)
     tasks = models.ManyToManyField(Task)
     service_target = models.ForeignKey(ServiceTarget, on_delete=models.DO_NOTHING, db_column='serviceTargetId')
     schedule_date = models.DateField(db_column='scheduleDate')
+    datetime_arrival = models.DateTimeField(blank=True, null=True)
+    datetime_departure = models.DateTimeField(blank=True, null=True)
+    customer = models.ForeignKey(Customer, on_delete=models.DO_NOTHING)
+    customer_signature = models.ImageField(blank=True, null=True)
+    technician_signature = models.ImageField(blank=True, null=True)
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId')
     workorder = models.OneToOneField(Workorder, on_delete=models.CASCADE, primary_key=False, blank=True, null=True)
 
@@ -775,93 +809,40 @@ class Maintenance(MrsModel):
         db_table = 'maintenances'
 
 
-class ScheduleEntry(MrsModel):
-    id = models.AutoField(primary_key=True)
-    type = models.IntegerField(
-        default=1)  # set the entry type, 1 = entry in maintenance plan, 2 entry out of a maintenance plan
-    notes = models.CharField(max_length=255, blank=True, null=True)
-    maintenance_plan = models.ForeignKey(MaintenancePlan, on_delete=models.CASCADE, db_column='planId', null=True,
-                                         blank=True)
-    procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, db_column='procedureId')
-    schedule_date = models.DateField(db_column='scheduleDate')
-    status = models.IntegerField(default=1)  # 1 = no workorder defined
-    workorder = models.OneToOneField(Workorder, on_delete=models.CASCADE, primary_key=False, blank=True, null=True)
-
-    class Meta:
-        managed = True
-        db_table = 'schedule_entries'
-
-
-class Operation(MrsModel):
-    id = models.AutoField(primary_key=True)
-    type = models.IntegerField()  # define if the operations was due to schedule entry, directly to a workorder, etc
-    notes = models.CharField(max_length=250, null=True, blank=True)
-    procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, db_column='procedureId')
-    schedule_entry = models.ForeignKey(ScheduleEntry, on_delete=models.DO_NOTHING, db_column='scheduleEntryId',
-                                       null=True, blank=True)
-    workorder = models.ForeignKey(Workorder, on_delete=models.DO_NOTHING, db_column='workorderId',
-                                  null=True, blank=True)
-    start_datetime = models.DateTimeField(default=timezone.now)
-    end_datetime = models.DateTimeField(null=True, blank=True)
-    status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId')
-    jha_check_list = models.ManyToManyField(JhaItem)
-
-    class Meta:
-        managed = True
-        db_table = 'operations'
-
-    def __str__(self):
-        return self.procedure.name
-
-
-class Action(MrsModel):
-    id = models.AutoField(primary_key=True)
-    operation = models.ForeignKey(Operation, on_delete=models.DO_NOTHING, db_column='operationId')
-    task = models.ForeignKey(Task, on_delete=models.DO_NOTHING, db_column='taskId')
-    status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId')
-
-    class Meta:
-        managed = True
-        db_table = 'actions'
-
-    def __str__(self):
-        return self.procedure.name
-
-
-class YearMaintenanceTemplate(MrsModel):
+class MaintenanceMonth(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
-    jan_procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, related_name='jan_procedure')
-    feb_procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, related_name='feb_procedure')
-    mar_procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, related_name='mar_procedure')
-    apr_procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, related_name='apr_procedure')
-    may_procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, related_name='may_procedure')
-    jun_procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, related_name='jun_procedure')
-    jul_procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, related_name='jul_procedure')
-    aug_procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, related_name='aug_procedure')
-    sep_procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, related_name='sep_procedure')
-    oct_procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, related_name='oct_procedure')
-    nov_procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, related_name='nov_procedure')
-    dec_procedure = models.ForeignKey(Procedure, on_delete=models.DO_NOTHING, related_name='dec_procedure')
-    enabled = models.BooleanField(default=True)
+    month_number = models.IntegerField()
+    template_tasks = models.ManyToManyField(TaskTemplate)
 
     class Meta:
         managed = True
-        db_table = 'year_maintenance_template'
+        db_table = 'maintenance_months'
 
     def __str__(self):
         return self.name
 
 
-class Month(MrsModel):
+class YearMaintenanceTemplate(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
-    number = models.IntegerField()
-    procedure = models.OneToOneField(Procedure, on_delete=models.CASCADE)
+    jan = models.ForeignKey(MaintenanceMonth, on_delete=models.PROTECT, related_name='jan')
+    feb = models.ForeignKey(MaintenanceMonth, on_delete=models.PROTECT, related_name='feb')
+    mar = models.ForeignKey(MaintenanceMonth, on_delete=models.PROTECT, related_name='mar')
+    apr = models.ForeignKey(MaintenanceMonth, on_delete=models.PROTECT, related_name='apr')
+    may = models.ForeignKey(MaintenanceMonth, on_delete=models.PROTECT, related_name='may')
+    jun = models.ForeignKey(MaintenanceMonth, on_delete=models.PROTECT, related_name='jun')
+    jul = models.ForeignKey(MaintenanceMonth, on_delete=models.PROTECT, related_name='jul')
+    aug = models.ForeignKey(MaintenanceMonth, on_delete=models.PROTECT, related_name='aug')
+    sep = models.ForeignKey(MaintenanceMonth, on_delete=models.PROTECT, related_name='sep')
+    oct = models.ForeignKey(MaintenanceMonth, on_delete=models.PROTECT, related_name='oct')
+    nov = models.ForeignKey(MaintenanceMonth, on_delete=models.PROTECT, related_name='nov')
+    dec = models.ForeignKey(MaintenanceMonth, on_delete=models.PROTECT, related_name='dec')
+    enabled = models.BooleanField(default=True)
 
     class Meta:
         managed = True
-        db_table = 'months'
+        db_table = 'year_maintenance_template'
 
     def __str__(self):
         return self.name
