@@ -311,23 +311,61 @@ class ServiceTargetSerializer(serializers.ModelSerializer):
                   'corrections',
                   'faults')
 
+
 class TaskTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskTemplate
         fields = ('id',
                   'name',
                   'description',
-                  'enable')
+                  'enabled',
+                  'project')
 
 
 class MaintenanceMonthSerializer(serializers.ModelSerializer):
-    tasks_template = TaskTemplateSerializer(many=True)
+    tasks_templates = TaskTemplateSerializer(many=True)
+
     class Meta:
         model = MaintenanceMonth
         fields = ('id',
                   'name',
                   'month_number',
-                  'tasks_template')
+                  'task_templates',
+                  'project')
+
+
+class YearMaintenanceTemplateSerializer(serializers.ModelSerializer):
+    jan = MaintenanceMonthSerializer(many=False)
+    feb = MaintenanceMonthSerializer(many=False)
+    mar = MaintenanceMonthSerializer(many=False)
+    apr = MaintenanceMonthSerializer(many=False)
+    may = MaintenanceMonthSerializer(many=False)
+    jun = MaintenanceMonthSerializer(many=False)
+    jul = MaintenanceMonthSerializer(many=False)
+    aug = MaintenanceMonthSerializer(many=False)
+    sep = MaintenanceMonthSerializer(many=False)
+    oct = MaintenanceMonthSerializer(many=False)
+    nov = MaintenanceMonthSerializer(many=False)
+    dec = MaintenanceMonthSerializer(many=False)
+
+    class Meta:
+        model = YearMaintenanceTemplate
+        fields = ('id',
+                  'name',
+                  'jan',
+                  'feb',
+                  'mar',
+                  'apr',
+                  'may',
+                  'jun',
+                  'jul',
+                  'aug',
+                  'sep',
+                  'oct',
+                  'nov',
+                  'dec',
+                  'enabled',
+                  'project')
 
 
 class TasksSerializer(serializers.ModelSerializer):

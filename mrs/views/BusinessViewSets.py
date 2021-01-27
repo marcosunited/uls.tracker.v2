@@ -212,6 +212,7 @@ class NoteViewSet(FilteredModelViewSet):
     queryset = Note.objects.all()
     serializer_class = NotesSerializer
 
+
 """
 # /procedures/idProcedure/tasks/idTask/
 class MaintenanceMonthTaskTemplateRelationView(APIView):
@@ -244,14 +245,21 @@ class MaintenanceMonthTaskTemplateRelationView(APIView):
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
 """
 
-class TaskViewSet(FilteredModelViewSet):
-    queryset = Task.objects.all()
-    serializer_class = TasksSerializer
+
+class TaskTemplateViewSet(FilteredModelViewSet):
+    queryset = TaskTemplate.objects.all()
+    serializer_class = TaskTemplateSerializer
 
 
-class MaintenancePlanViewSet(FilteredModelViewSet):
-    queryset = MaintenancePlan.objects.all()
-    serializer_class = MaintenancePlansSerializer
+class MaintenanceMonthViewSet(FilteredModelViewSet):
+    queryset = MaintenanceMonth.objects.all()
+    serializer_class = MaintenanceMonthSerializer
+
+
+class YearMaintenanceTemplateViewSet(FilteredModelViewSet):
+    queryset = YearMaintenanceTemplate.objects.all()
+    serializer_class = YearMaintenanceTemplateSerializer
+
 
 
 class GenerateMaintenancePlanView(APIView):
@@ -270,4 +278,3 @@ class GenerateMaintenancePlanView(APIView):
             return JsonResponse({'result': pk_lift, 'error': ''})
         except Exception as error:
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
-
