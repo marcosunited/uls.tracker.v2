@@ -598,6 +598,7 @@ class WorkflowEvent(MrsModel):
 
 class Priority(MrsModel):
     id = models.AutoField(primary_key=True)
+    level = models.SmallIntegerField()
     name = models.CharField(max_length=50)
 
     class Meta:
@@ -608,105 +609,50 @@ class Priority(MrsModel):
         return self.name
 
 
-class WorkorderLift(MrsModel):
-    id = models.AutoField(primary_key=True)
-    lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
-    status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId')
-    notes = models.CharField(max_length=255, blank=True, null=True)
-    started_datetime = models.DateTimeField(db_column='startedDatetime', blank=True, null=True)
-    completed_datetime = models.DateTimeField(db_column='completedDatetime', blank=True, null=True)
-    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
-
-    class Meta:
-        managed = True
-        db_table = 'workorders_lifts'
-
-
 class Workorder(MrsModel):
     id = models.AutoField(primary_key=True)
     id_by_project = models.IntegerField(db_column='idByProject')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId')
     job = models.ForeignKey(Job, on_delete=models.DO_NOTHING, db_column='jobId')
+    lifts = models.ManyToManyField(Lift)
+
+    # maintenance, callout, repair
     process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
+    docket_number = models.IntegerField(blank=True, null=True)
+    service_areas = models.ManyToManyField(ServiceArea)
+    service_types = models.ManyToManyField(ServiceType)
+    service_target = models.ForeignKey(ServiceTarget, on_delete=models.DO_NOTHING, db_column='serviceTargetId')
     priority = models.ForeignKey(Priority, on_delete=models.DO_NOTHING, db_column='priorityId')
     technician = models.ForeignKey(Technician, on_delete=models.DO_NOTHING, db_column='technicianId')
-    customer_id = models.IntegerField(db_column='customerId')
     accepted_datetime = models.DateTimeField(db_column='acceptedDatetime', blank=True, null=True)
-    started_datetime = models.DateTimeField(db_column='startedDatetime', blank=True, null=True)
     scheduled_datetime = models.DateTimeField(db_column='scheduledDatetime', blank=True, null=True)
+    started_datetime = models.DateTimeField(db_column='startedDatetime', blank=True, null=True)
     completed_datetime = models.DateTimeField(db_column='completedDatetime', blank=True, null=True)
+    toa = models.DateTimeField(db_column='toa', blank=True, null=True)
+    tod = models.DateTimeField(db_column='tod', blank=True, null=True)
     reported_fault = models.ForeignKey(Fault, on_delete=models.DO_NOTHING, db_column='reportedFaultId', blank=True,
                                        null=True)
     detected_fault = models.IntegerField(db_column='detectedFaultId', blank=True, null=True)
     subject = models.CharField(max_length=255, blank=True, null=True)
-    description = models.TextField(max_length=32000, blank=True, null=True)
+    technician_description = models.TextField(max_length=32000, blank=True, null=True)
     notes = models.ManyToManyField(Note)
     correction = models.ForeignKey(Correction, models.DO_NOTHING, db_column='correctionId')
     solution = models.TextField(max_length=32000, blank=True, null=True)
-    signature = models.IntegerField(db_column='signatureId', blank=True, null=True)
+    customer = models.ForeignKey(Customer, on_delete=models.DO_NOTHING)
+    customer_signature = models.ImageField(blank=True, null=True)
+    technician_signature = models.ImageField(blank=True, null=True)
     attention_time = models.IntegerField(db_column='attentionTime', blank=True, null=True)
     solution_time = models.IntegerField(db_column='solutionTime', blank=True, null=True)
     expected_time = models.IntegerField(db_column='expectedTime', blank=True, null=True)
     is_chargeable = models.BooleanField(default='False', db_column='isChargeable')
-    part_required = models.IntegerField(db_column='partRequired')
+    parts_required = models.ManyToManyField(Part)
     is_closed = models.BooleanField(default=False, db_column='isClosed')
     jha_items = models.ManyToManyField(JhaItem)
 
     class Meta:
         managed = True
         db_table = 'workorders'
-
-
-class ClosedWorkorder(MrsModel):
-    id = models.AutoField(primary_key=True)
-    workorder_lifts = models.ManyToManyField(WorkorderLift)
-    id_by_project = models.IntegerField(db_column='idByProject')
-    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
-    status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId')
-    job = models.ForeignKey(Job, on_delete=models.DO_NOTHING, db_column='jobId')
-    process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
-    priority = models.ForeignKey(Priority, on_delete=models.DO_NOTHING, db_column='priorityId')
-    technician = models.ForeignKey(Technician, on_delete=models.DO_NOTHING, db_column='technicianId')
-    notes = models.ManyToManyField(Note)
-    customer_id = models.IntegerField(db_column='customerId')
-    accepted_datetime = models.DateTimeField(db_column='acceptedDatetime', blank=True, null=True)
-    started_datetime = models.DateTimeField(db_column='startedDatetime', blank=True, null=True)
-    scheduled_datetime = models.DateTimeField(db_column='scheduledDatetime', blank=True, null=True)
-    completed_datetime = models.DateTimeField(db_column='completedDatetime', blank=True, null=True)
-    reported_fault = models.ForeignKey(Fault, related_name='wo_reported_fault', on_delete=models.DO_NOTHING,
-                                       db_column='reportedFaultId', blank=True, null=True)
-    detected_fault = models.ForeignKey(Fault, related_name='wo_detected_fault', on_delete=models.DO_NOTHING,
-                                       db_column='detectedFaultId', blank=True, null=True)
-    lift = models.ForeignKey(Lift, on_delete=models.DO_NOTHING, db_column='liftId')
-    subject = models.CharField(max_length=255, blank=True, null=True)
-    description = models.CharField(max_length=32000, blank=True, null=True)
-    correction = models.ForeignKey(Correction, models.DO_NOTHING, db_column='correctionId')
-    solution = models.CharField(max_length=32000, blank=True, null=True)
-    signature = models.IntegerField(db_column='signatureId', blank=True, null=True)
-    attention_time = models.IntegerField(db_column='attentionTime', blank=True, null=True)
-    solution_time = models.IntegerField(db_column='solutionTime', blank=True, null=True)
-    expected_time = models.IntegerField(db_column='expectedTime', blank=True, null=True)
-    is_chargeable = models.BooleanField(default='False', db_column='isChargeable')
-    part_required = models.IntegerField(db_column='partRequired')
-
-    class Meta:
-        managed = True
-        db_table = 'closed_workorders'
-
-
-class WorkordersHistory(MrsModel):
-    id = models.AutoField(primary_key=True)
-    workorder = models.ForeignKey(Workorder, on_delete=models.DO_NOTHING, db_column='workorderId')
-    change_type_id = models.IntegerField(db_column='changeTypeId')
-    value = models.CharField(max_length=4000)
-    user_id = models.IntegerField(db_column='userId', unique=True)
-    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
-    timestamp = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        managed = True
-        db_table = 'workorders_history'
 
 
 class MaintenancePlan(MrsModel):
@@ -767,7 +713,7 @@ class Task(MrsModel):
     notes = models.CharField(max_length=255, blank=True, null=True)
     task_template = models.ForeignKey(TaskTemplate, on_delete=models.DO_NOTHING, null=True, blank=True)
     maintenance = models.ForeignKey(Maintenance, on_delete=models.PROTECT, null=True, blank=True)
-    status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId')
+    status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', default='1')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
 
     class Meta:

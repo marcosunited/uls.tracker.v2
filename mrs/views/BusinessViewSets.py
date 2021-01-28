@@ -64,7 +64,7 @@ class RoundTechnicianRelationView(APIView):
             technician = Technician.objects.get(id=pk_technician)
             round.technicians.add(technician.id)
             round_serializer = RoundsSerializer(round)
-            return JsonResponse({'result': round_serializer.data, 'error': ''})
+            return JsonResponse({'result': round_serializer.data})
         except Round.DoesNotExist:
             return JsonResponse(ResponseHttp(error='The round does not exist').result, status=HTTP_404_NOT_FOUND)
         except Technician.DoesNotExist:
@@ -78,7 +78,7 @@ class RoundTechnicianRelationView(APIView):
             technician = Technician.objects.get(id=pk_technician)
             round.technicians.remove(technician.id)
             round_serializer = RoundsSerializer(round)
-            return JsonResponse({'result': round_serializer.data, 'error': ''})
+            return JsonResponse({'result': round_serializer.data})
         except Round.DoesNotExist:
             return JsonResponse(ResponseHttp(error='The round does not exist').result, status=HTTP_404_NOT_FOUND)
         except Technician.DoesNotExist:
@@ -89,7 +89,21 @@ class RoundTechnicianRelationView(APIView):
 
 class ProfileViewSet(FilteredModelViewSet):
     queryset = Profile.objects.all()
-    serializer_class = ProjectsSerializer
+    serializer_class = ProfilesSerializer
+
+
+class ProjectProfileOptionsView(APIView):
+    def get(self, request, pk_project):
+        try:
+            profiles_all = Profile.objects.all();
+            project = Project.objects.get(id=pk_project)
+            profile_options = [profile for profile in profiles_all if profile not in project.profile_set.all()]
+            profile_serializer = ProfilesSerializer(profile_options, many=True)
+            return JsonResponse({'result': profile_serializer.data})
+        except Project.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The project does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # /profiles/idProfile/projects/idProject/
@@ -100,7 +114,7 @@ class ProfileProjectRelationView(APIView):
             project = Project.objects.get(id=pk_project)
             profile.projects.add(project.id)
             profile_serializer = ProfilesSerializer(profile)
-            return JsonResponse({'result': profile_serializer.data, 'error': ''})
+            return JsonResponse({'result': profile_serializer.data})
         except Profile.DoesNotExist:
             return JsonResponse(ResponseHttp(error='The profile does not exist').result, status=HTTP_404_NOT_FOUND)
         except Project.DoesNotExist:
@@ -114,7 +128,7 @@ class ProfileProjectRelationView(APIView):
             project = Project.objects.get(id=pk_project)
             profile.projects.remove(project.id)
             profile_serializer = ProfilesSerializer(profile)
-            return JsonResponse({'result': profile_serializer.data, 'error': ''})
+            return JsonResponse({'result': profile_serializer.data})
         except Profile.DoesNotExist:
             return JsonResponse(ResponseHttp(error='The profile does not exist').result, status=HTTP_404_NOT_FOUND)
         except Project.DoesNotExist:
@@ -131,7 +145,7 @@ class JobLiftRelationView(APIView):
             lift = Lift.objects.get(id=pk_lift)
             job.lift_set.add(lift)
             job_serializer = JobsSerializer(job)
-            return JsonResponse({'result': job_serializer.data, 'error': ''})
+            return JsonResponse({'result': job_serializer.data})
         except Job.DoesNotExist:
             return JsonResponse(ResponseHttp(error='The job does not exist').result, status=HTTP_404_NOT_FOUND)
         except Lift.DoesNotExist:
@@ -145,7 +159,7 @@ class JobLiftRelationView(APIView):
             lift = Lift.objects.get(id=pk_lift)
             job.lift_set.remove(lift.id)
             job_serializer = JobsSerializer(job)
-            return JsonResponse({'result': job_serializer.data, 'error': ''})
+            return JsonResponse({'result': job_serializer.data})
         except Job.DoesNotExist:
             return JsonResponse(ResponseHttp(error='The job does not exist').result, status=HTTP_404_NOT_FOUND)
         except Lift.DoesNotExist:
@@ -181,7 +195,7 @@ class TechnicianJobsRelationView(APIView):
                 _jobs = _round.job_set.all()
                 for job in _jobs:
                     jobs.append(JobsSerializer(job).data)
-            return JsonResponse({'result': jobs, 'error': ''})
+            return JsonResponse({'result': jobs})
         except Technician.DoesNotExist:
             return JsonResponse(ResponseHttp(error='The technician does not exist').result, status=HTTP_404_NOT_FOUND)
         except Exception as error:
@@ -268,7 +282,7 @@ class GenerateMaintenancePlanView(APIView):
         try:
             maintenance_service = MaintenanceService()
             plan = maintenance_service.generate_plan(pk_lift)
-            return JsonResponse({'result': plan, 'error': ''})
+            return JsonResponse({'result': plan})
         except Exception as error:
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
