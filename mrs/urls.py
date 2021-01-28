@@ -66,6 +66,9 @@ urlpatterns = [
     url(r'^api/v1/profiles/(?P<pk_profile>[0-9]+)/projects/(?P<pk_project>[0-9]+)$',
         BusinessViewSets.ProfileProjectRelationView.as_view()),
 
+    url(r'^api/v1/profiles/options/projects/(?P<pk_project>[0-9]+)$',
+        BusinessViewSets.ProjectProfileOptionsView.as_view()),
+
     # jobs - lifts
     url(r'^api/v1/jobs/(?P<pk_job>[0-9]+)/lifts/(?P<pk_lift>[0-9]+)$',
         BusinessViewSets.JobLiftRelationView.as_view()),
