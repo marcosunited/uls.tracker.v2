@@ -236,11 +236,13 @@ class ProfilesSerializer(serializers.ModelSerializer):
 
 
 class ProjectProfilesSerializer(serializers.ModelSerializer):
+    user = PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
+
     class Meta:
         model = Profile
         fields = ('id',
-                  'fullname'
-                  )
+                  'user',
+                  'fullname')
 
 
 class TechniciansSerializer(serializers.ModelSerializer):
