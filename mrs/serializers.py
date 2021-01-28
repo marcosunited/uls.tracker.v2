@@ -406,7 +406,7 @@ class ReportHistorySerializer(serializers.ModelSerializer):
 
 
 class ProjectsSerializer(serializers.ModelSerializer):
-    profiles = ProjectProfilesSerializer(many=True, source='profile_set')
+    profiles = ProjectProfilesSerializer(many=True, source='profile_set', required=False)
 
     class Meta:
         model = Project

@@ -95,7 +95,7 @@ class ProfileViewSet(FilteredModelViewSet):
 class ProjectProfileOptionsView(APIView):
     def get(self, request, pk_project):
         try:
-            profiles_all = Profile.objects.all();
+            profiles_all = Profile.objects.all()
             project = Project.objects.get(id=pk_project)
             profile_options = [profile for profile in profiles_all if profile not in project.profile_set.all()]
             profile_serializer = ProfilesSerializer(profile_options, many=True)
