@@ -85,7 +85,8 @@ class ContractsSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         contact_data = validated_data.pop('contact')
-        Contact.objects.update(**contact_data)
+        Contact.objects.filter(id=instance.contact.id).update(**contact_data)
+
         instance.name = validated_data.get('name', instance.name)
         instance.is_active = validated_data.get('is_active', instance.is_active)
         instance.start_datetime = validated_data.get('start_datetime', instance.start_datetime)
@@ -141,11 +142,13 @@ class AgentsSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         contact_data = validated_data.pop('contact')
-        Contact.objects.update(**contact_data)
+        Contact.objects.filter(id=instance.contact.id).update(**contact_data)
+
         instance.name = validated_data.get('name', instance.name)
         instance.project = validated_data.get('project', instance.project)
         instance.save()
-        return instance
+
+        return Agent.objects.get(id=instance.id)
 
 
 class JobsSerializer(DynamicFieldsModelSerializer):
@@ -262,7 +265,8 @@ class TechniciansSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('profile')
-        Profile.objects.update(**profile_data)
+        Profile.objects.filter(id=instance.profile.id).update(**profile_data)
+
         instance.notes = validated_data.get('notes', instance.notes)
         instance.save()
         return instance
