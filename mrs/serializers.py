@@ -33,7 +33,65 @@ class MetadataValuesSerializer(serializers.ModelSerializer):
                   'value',)
 
 
+class ServiceAreaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceArea
+        fields = ('id',
+                  'name')
+
+
+class ServiceTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceType
+        fields = ('id',
+                  'name')
+
+
+class ServiceTargetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceTarget
+        fields = ('id',
+                  'name',
+                  'key_name')
+
+
+class PrioritiesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Priority
+        fields = ('id',
+                  'name',
+                  'level')
+
+
+class ProcessTypesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProcessType
+        fields = ('id',
+                  'name',
+                  'description',
+                  'project')
+
+
+class ProcessTypeStatusSerializer(serializers.ModelSerializer):
+    process_type = PrimaryKeyRelatedField(queryset=ProcessType.objects.all(), many=False)
+
+    class Meta:
+        model = ProcessTypeStatus
+        fields = ('id',
+                  'name',
+                  'description',
+                  'is_active',
+                  'is_initial',
+                  'is_final',
+                  'sequence_number',
+                  'process_type'
+                  'project')
+
+
 class ContactsSerializer(serializers.ModelSerializer):
+    title = MetadataValuesSerializer(many=False)
+    position = MetadataValuesSerializer(many=False)
+
     class Meta:
         model = Contact
         fields = ('id',
@@ -86,7 +144,6 @@ class ContractsSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         contact_data = validated_data.pop('contact')
         Contact.objects.filter(id=instance.contact.id).update(**contact_data)
-
         instance.name = validated_data.get('name', instance.name)
         instance.is_active = validated_data.get('is_active', instance.is_active)
         instance.start_datetime = validated_data.get('start_datetime', instance.start_datetime)
@@ -141,11 +198,13 @@ class AgentsSerializer(serializers.ModelSerializer):
         return agent
 
     def update(self, instance, validated_data):
-        contact_data = validated_data.pop('contact')
-        Contact.objects.filter(id=instance.contact.id).update(**contact_data)
-
-        instance.name = validated_data.get('name', instance.name)
-        instance.project = validated_data.get('project', instance.project)
+        if "contact" in validated_data:
+            contact_data = validated_data.pop('contact')
+            Contact.objects.filter(id=instance.contact.id).update(**contact_data)
+        if "name" in validated_data:
+            instance.name = validated_data.get('name', instance.name)
+        if "project" in validated_data:
+            instance.project = validated_data.get('project', instance.project)
         instance.save()
 
         return Agent.objects.get(id=instance.id)
@@ -193,13 +252,6 @@ class GroupsSerializer(serializers.ModelSerializer):
                   'jobs')
 
 
-class TitlesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Title
-        fields = ('id',
-                  'name',)
-
-
 class CountriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
@@ -213,7 +265,6 @@ class ProfilesSerializer(serializers.ModelSerializer):
     user = PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
     projects = PrimaryKeyRelatedField(many=True, queryset=Project.objects.all())
     default_project = PrimaryKeyRelatedField(many=False, queryset=Project.objects.all())
-    title = TitlesSerializer(many=False, read_only=True)
     country = CountriesSerializer(many=False, read_only=True)
 
     class Meta:

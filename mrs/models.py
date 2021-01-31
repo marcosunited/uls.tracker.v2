@@ -77,7 +77,6 @@ class ProcessType(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=255)
-    initial_status = models.IntegerField(db_column='initialStatus')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
 
     class Meta:
@@ -92,8 +91,9 @@ class ProcessTypeStatus(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=255)
-    is_active = models.IntegerField(db_column='isActive')
-    is_final = models.IntegerField(db_column='isFinal')
+    is_active = models.BooleanField(db_column='isActive', default=True)
+    is_initial = models.BooleanField(db_column='isInitial', default=True)
+    is_final = models.BooleanField(db_column='isFinal', default=False)
     sequence_number = models.PositiveSmallIntegerField(default=1)
     process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
@@ -177,18 +177,6 @@ class Country(MrsModel):
         return self.name
 
 
-class Title(MrsModel):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100, blank=True, null=True)
-
-    class Meta:
-        managed = True
-        db_table = 'titles'
-
-    def __str__(self):
-        return self.name
-
-
 class Profile(MrsModel):
     id = models.AutoField(primary_key=True)
     user = models.OneToOneField(User, on_delete=models.DO_NOTHING, db_column='userId')
@@ -197,7 +185,7 @@ class Profile(MrsModel):
     email = models.EmailField(max_length=200, blank=True, null=True)
     email_verified = models.BooleanField(db_column='emailVerified', blank=True, null=True)
     alternative_email = models.EmailField(max_length=200, blank=True, null=True)
-    title = models.ForeignKey(Title, on_delete=models.DO_NOTHING, db_column='titleId', blank=True, null=True)
+    title = models.ForeignKey(MetadataValue, on_delete=models.DO_NOTHING, db_column='titleId', blank=True, null=True)
     street_address = models.CharField(db_column='streetAddress', max_length=255, blank=True, null=True)
     postcode = models.CharField(db_column='postCode', max_length=12, blank=True, null=True)
     country = models.ForeignKey(Country, on_delete=models.DO_NOTHING, db_column='countryId', blank=True, null=True)
@@ -221,8 +209,8 @@ class Profile(MrsModel):
 
 class Contact(MrsModel):
     id = models.AutoField(primary_key=True)
-    title = models.PositiveIntegerField()
-    position = models.PositiveIntegerField()
+    title = models.ForeignKey(MetadataValue, default=1, on_delete=models.DO_NOTHING, related_name='title', db_column='title_id')
+    position = models.ForeignKey(MetadataValue, default=1, on_delete=models.DO_NOTHING, related_name='position', db_column='position_id')
     first_name = models.CharField(max_length=70)
     last_name = models.CharField(max_length=70)
     phone_number = models.CharField(max_length=50)
@@ -598,8 +586,8 @@ class WorkflowEvent(MrsModel):
 
 class Priority(MrsModel):
     id = models.AutoField(primary_key=True)
-    level = models.SmallIntegerField()
     name = models.CharField(max_length=50)
+    level = models.SmallIntegerField(default=1)
 
     class Meta:
         managed = True
@@ -613,12 +601,11 @@ class Workorder(MrsModel):
     id = models.AutoField(primary_key=True)
     id_by_project = models.IntegerField(db_column='idByProject')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
+    # maintenance, callout, repair
+    process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId')
     job = models.ForeignKey(Job, on_delete=models.DO_NOTHING, db_column='jobId')
     lifts = models.ManyToManyField(Lift)
-
-    # maintenance, callout, repair
-    process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
     docket_number = models.IntegerField(blank=True, null=True)
     service_areas = models.ManyToManyField(ServiceArea)
     service_types = models.ManyToManyField(ServiceType)
