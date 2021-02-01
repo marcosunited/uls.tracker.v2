@@ -209,8 +209,10 @@ class Profile(MrsModel):
 
 class Contact(MrsModel):
     id = models.AutoField(primary_key=True)
-    title = models.ForeignKey(MetadataValue, default=1, on_delete=models.DO_NOTHING, related_name='title', db_column='title_id')
-    position = models.ForeignKey(MetadataValue, default=1, on_delete=models.DO_NOTHING, related_name='position', db_column='position_id')
+    title = models.ForeignKey(MetadataValue, default=1, on_delete=models.DO_NOTHING, related_name='title',
+                              db_column='title_id')
+    position = models.ForeignKey(MetadataValue, default=1, on_delete=models.DO_NOTHING, related_name='position',
+                                 db_column='position_id')
     first_name = models.CharField(max_length=70)
     last_name = models.CharField(max_length=70)
     phone_number = models.CharField(max_length=50)
