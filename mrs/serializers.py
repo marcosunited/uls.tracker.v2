@@ -104,6 +104,47 @@ class ContactsSerializer(serializers.ModelSerializer):
                   'email',
                   'address')
 
+    def create(self, validated_data):
+        title_data = validated_data.pop('title')
+        position_data = validated_data.pop('position')
+        title = MetadataValue.objects.get(title_data.id)
+        position = MetadataValue.objects.get(position_data.id)
+
+        address_data = validated_data.pop('address')
+        address = Address.objects.create(**address_data)
+
+        contact = Contact.objects.create(title=title,
+                                         position=position,
+                                         address=address, **validated_data)
+        return contact
+
+    def update(self, instance, validated_data):
+        if "title" in validated_data:
+            title_data = validated_data.pop('title')
+            title = MetadataValue.objects.get(title_data.id)
+            instance.title = title
+        if "position" in validated_data:
+            position_data = validated_data.pop('position')
+            position = MetadataValue.objects.get(position_data.id)
+            instance.position = position
+        if "address" in validated_data:
+            address_data = validated_data.pop('address')
+            Address.objects.filter(id=instance.address.id).update(**address_data)
+        if "first_name" in validated_data:
+            instance.first_name = validated_data.get('first_name', instance.first_name)
+        if "last_name" in validated_data:
+            instance.last_name = validated_data.get('last_name', instance.first_name)
+        if "phone_number" in validated_data:
+            instance.phone_number = validated_data.get('phone_number', instance.phone_number)
+        if "mobile_number" in validated_data:
+            instance.mobile_number = validated_data.get('mobile_number', instance.mobile_number)
+        if "email" in validated_data:
+            instance.email = validated_data.get('email', instance.email)
+
+        instance.save()
+
+        return Contact.objects.get(id=instance.id)
+
 
 class ContractFrequenciesSerializer(serializers.ModelSerializer):
     class Meta:

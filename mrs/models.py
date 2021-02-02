@@ -34,6 +34,19 @@ class Project(MrsModel):
         return self.name
 
 
+class Address(MrsModel):
+    id = models.AutoField(primary_key=True)
+    number = models.PositiveIntegerField()
+    street = models.CharField(max_length=250)
+    post_code = models.PositiveIntegerField()
+    suburb = models.CharField(max_length=250, blank=True, null=True)
+    state = models.CharField(max_length=250)
+
+    class Meta:
+        managed = True
+        db_table = 'addresses'
+
+
 class Customer(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
@@ -108,10 +121,6 @@ class ProcessTypeStatus(MrsModel):
 
 class Note(MrsModel):
     id = models.AutoField(primary_key=True)
-    document_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING,
-                                      db_column='contentTypeId', blank=True, null=True)
-    document_id = models.PositiveIntegerField()
-    document = GenericForeignKey('document_type', 'document_id')
     title = models.CharField(max_length=70)
     description = models.CharField(max_length=8000)
 
@@ -210,15 +219,15 @@ class Profile(MrsModel):
 class Contact(MrsModel):
     id = models.AutoField(primary_key=True)
     title = models.ForeignKey(MetadataValue, default=1, on_delete=models.DO_NOTHING, related_name='title',
-                              db_column='title_id')
+                              db_column='title_id', blank=True, null=True)
     position = models.ForeignKey(MetadataValue, default=1, on_delete=models.DO_NOTHING, related_name='position',
-                                 db_column='position_id')
+                                 db_column='position_id', blank=True, null=True)
     first_name = models.CharField(max_length=70)
     last_name = models.CharField(max_length=70)
     phone_number = models.CharField(max_length=50)
-    mobile_number = models.CharField(max_length=50)
-    email = models.EmailField(max_length=200)
-    address = models.CharField(max_length=250)
+    mobile_number = models.CharField(max_length=50, blank=True, null=True)
+    email = models.EmailField(max_length=200, blank=True, null=True)
+    address = models.ForeignKey(Address, on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
         managed = True
@@ -340,7 +349,7 @@ class Contract(MrsModel):
     cancel_datetime = models.CharField(db_column='cancelDatetime', max_length=255, blank=True, null=True)
     price = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True)
     contact = models.OneToOneField(Contact, on_delete=models.CASCADE, blank=True, null=True)
-    contract_mtn_frequency = models.OneToOneField(ContractFrequency, on_delete=models.CASCADE, blank=True, null=True)
+    contract_mtn_frequency = models.CharField(max_length=250, blank=True, null=True)
     notes = models.CharField(max_length=255, blank=True, null=True)
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', default='1')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
