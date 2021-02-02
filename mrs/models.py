@@ -36,7 +36,7 @@ class Project(MrsModel):
 
 class Address(MrsModel):
     id = models.AutoField(primary_key=True)
-    number = models.PositiveIntegerField()
+    number = models.CharField(max_length=10)
     street = models.CharField(max_length=250)
     post_code = models.PositiveIntegerField()
     suburb = models.CharField(max_length=250, blank=True, null=True)
@@ -239,8 +239,8 @@ class Contact(MrsModel):
 
 class Attachment(MrsModel):
     id = models.AutoField(primary_key=True)
-    conceptid = models.IntegerField(db_column='conceptId', unique=True)
-    valueconcept = models.IntegerField(db_column='valueConcept')
+    concept_id = models.IntegerField(db_column='conceptId', unique=True)
+    value_concept = models.IntegerField(db_column='valueConcept')
     name = models.CharField(max_length=255)
     path = models.CharField(max_length=512)
 

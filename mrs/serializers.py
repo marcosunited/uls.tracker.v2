@@ -88,9 +88,22 @@ class ProcessTypeStatusSerializer(serializers.ModelSerializer):
                   'project')
 
 
+class AddressesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Address
+        fields = ('id',
+                  'number',
+                  'street',
+                  'post_code',
+                  'suburb',
+                  'state')
+
+
 class ContactsSerializer(serializers.ModelSerializer):
-    title = MetadataValuesSerializer(many=False)
-    position = MetadataValuesSerializer(many=False)
+    title = MetadataValuesSerializer(many=False, read_only=True)
+    position = MetadataValuesSerializer(many=False, read_only=True)
+    address = AddressesSerializer(many=False)
 
     class Meta:
         model = Contact
@@ -120,12 +133,12 @@ class ContactsSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         if "title" in validated_data:
-            title_data = validated_data.pop('title')
-            title = MetadataValue.objects.get(title_data.id)
+            title_id = validated_data.pop('title')
+            title = MetadataValue.objects.get(id=title_id)
             instance.title = title
         if "position" in validated_data:
-            position_data = validated_data.pop('position')
-            position = MetadataValue.objects.get(position_data.id)
+            position_id = validated_data.pop('position')
+            position = MetadataValue.objects.get(id=position_id)
             instance.position = position
         if "address" in validated_data:
             address_data = validated_data.pop('address')
@@ -240,8 +253,10 @@ class AgentsSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         if "contact" in validated_data:
-            contact_data = validated_data.pop('contact')
-            Contact.objects.filter(id=instance.contact.id).update(**contact_data)
+            contact_data = self.initial_data.pop('contact')
+            contact = Contact.objects.get(id=instance.contact.id)
+            contact_serializer = ContactsSerializer()
+            contact_serializer.update(contact, contact_data)
         if "name" in validated_data:
             instance.name = validated_data.get('name', instance.name)
         if "project" in validated_data:

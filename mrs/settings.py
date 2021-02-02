@@ -62,12 +62,11 @@ WSGI_APPLICATION = 'mrs.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mrs',
+        'NAME': 'mrs.dev',
         'USER': 'dev',
         'PASSWORD': 'DBPassULS$2020',
         'HOST': '10.42.0.246',
         'PORT': '3306',
-
     }
 }
 
