@@ -120,8 +120,8 @@ class ContactsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         title_data = validated_data.pop('title')
         position_data = validated_data.pop('position')
-        title = MetadataValue.objects.get(title_data.id)
-        position = MetadataValue.objects.get(position_data.id)
+        title = MetadataValue.objects.get(id=title_data['id'])
+        position = MetadataValue.objects.get(id=position_data['id'])
 
         address_data = validated_data.pop('address')
         address = Address.objects.create(**address_data)
@@ -259,8 +259,10 @@ class AgentsSerializer(serializers.ModelSerializer):
                   'project')
 
     def create(self, validated_data):
-        contact_data = validated_data.pop('contact')
-        contact = Contact.objects.create(**contact_data)
+        contact_data = self.initial_data.pop('contact')
+        validated_data.pop('contact')
+        contact_serializer = ContactsSerializer()
+        contact = contact_serializer.create(contact_data)
         agent = Agent.objects.create(contact=contact, **validated_data)
         return agent
 
