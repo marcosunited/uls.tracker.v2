@@ -467,7 +467,7 @@ class Job(MrsModel):
     group = models.ForeignKey(Group, on_delete=models.DO_NOTHING, db_column='groupId', blank=True, null=True)
     owner_details = models.CharField(db_column='ownerDetails', max_length=250, blank=True, null=True)
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId', default='1')
-    documents = models.ManyToManyField(mrs.utils.storage.FileDocument)
+    documents = models.ManyToManyField(mrs.utils.storage.FileDocument, blank=True, null=True)
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
 
     class Meta:

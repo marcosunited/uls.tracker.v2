@@ -196,18 +196,31 @@ class ContractsSerializer(serializers.ModelSerializer):
         return contract
 
     def update(self, instance, validated_data):
-        contact_data = validated_data.pop('contact')
-        Contact.objects.filter(id=instance.contact.id).update(**contact_data)
-        instance.name = validated_data.get('name', instance.name)
-        instance.is_active = validated_data.get('is_active', instance.is_active)
-        instance.start_datetime = validated_data.get('start_datetime', instance.start_datetime)
-        instance.end_datetime = validated_data.get('end_datetime', instance.end_datetime)
-        instance.stand_by_datetime = validated_data.get('stand_by_datetime', instance.stand_by_datetime)
-        instance.reactive_datetime = validated_data.get('reactive_datetime', instance.reactive_datetime)
-        instance.cancel_datetime = validated_data.get('cancel_datetime', instance.cancel_datetime)
-        instance.price = validated_data.get('price', instance.price)
-        instance.notes = validated_data.get('notes', instance.notes)
-        instance.status = validated_data.get('status', instance.status)
+        if "contact" in validated_data:
+            contact_data = self.initial_data.pop('contact')
+            contact = Contact.objects.get(id=instance.contact.id)
+            contact_serializer = ContactsSerializer()
+            contact_serializer.update(contact, contact_data)
+        if "name" in validated_data:
+            instance.name = validated_data.get('name', instance.name)
+        if "is_active" in validated_data:
+            instance.is_active = validated_data.get('is_active', instance.is_active)
+        if "start_datetime" in validated_data:
+            instance.start_datetime = validated_data.get('start_datetime', instance.start_datetime)
+        if "end_datetime" in validated_data:
+            instance.end_datetime = validated_data.get('end_datetime', instance.end_datetime)
+        if "stand_by_datetime" in validated_data:
+            instance.stand_by_datetime = validated_data.get('stand_by_datetime', instance.stand_by_datetime)
+        if "reactive_datetime" in validated_data:
+            instance.reactive_datetime = validated_data.get('reactive_datetime', instance.reactive_datetime)
+        if "cancel_datetime" in validated_data:
+            instance.cancel_datetime = validated_data.get('cancel_datetime', instance.cancel_datetime)
+        if "price" in validated_data:
+            instance.price = validated_data.get('price', instance.price)
+        if "notes" in validated_data:
+            instance.notes = validated_data.get('notes', instance.notes)
+        if "status" in validated_data:
+            instance.status = validated_data.get('status', instance.status)
         instance.save()
         return instance
 
