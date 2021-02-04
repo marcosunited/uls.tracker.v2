@@ -11,7 +11,7 @@ from mrs.utils.model import LogicalDeleteModelViewSet
 from mrs.utils.response import ResponseHttp
 
 
-class JhaItemViewSet(FilteredModelViewSet, CachedModelViewSet):
+class JhaItemViewSet(FilteredModelViewSet, CachedModelViewSet, LogicalDeleteModelViewSet):
     queryset = JhaItem.objects.all()
     serializer_class = JhaItemsSerializer
 
@@ -31,27 +31,27 @@ class ProjectViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     serializer_class = ProjectsSerializer
 
 
-class ContactViewSet(FilteredModelViewSet):
+class ContactViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = Contact.objects.all()
     serializer_class = ContactsSerializer
 
 
-class ContractViewSet(FilteredModelViewSet):
+class ContractViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = Contract.objects.all()
     serializer_class = ContractsSerializer
 
 
-class ContractFrequencyViewSet(FilteredModelViewSet):
+class ContractFrequencyViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = ContractFrequency.objects.all()
     serializer_class = ContractFrequenciesSerializer
 
 
-class JobViewSet(FilteredModelViewSet):
+class JobViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobsSerializer
 
 
-class RoundViewSet(FilteredModelViewSet):
+class RoundViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = Round.objects.all()
     serializer_class = RoundsSerializer
 
@@ -101,7 +101,7 @@ class RoundTechnicianRelationView(APIView):
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class ProfileViewSet(FilteredModelViewSet):
+class ProfileViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfilesSerializer
 
@@ -182,17 +182,17 @@ class JobLiftRelationView(APIView):
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class GroupViewSet(FilteredModelViewSet):
+class GroupViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupsSerializer
 
 
-class AgentViewSet(FilteredModelViewSet):
+class AgentViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = Agent.objects.all()
     serializer_class = AgentsSerializer
 
 
-class TechnicianViewSet(FilteredModelViewSet):
+class TechnicianViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = Technician.objects.all()
     serializer_class = TechniciansSerializer
 
@@ -216,27 +216,27 @@ class TechnicianJobsRelationView(APIView):
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class LiftViewSet(FilteredModelViewSet):
+class LiftViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = Lift.objects.all()
     serializer_class = LiftsSerializer
 
 
-class CorrectionViewSet(FilteredModelViewSet):
+class CorrectionViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = Correction.objects.all()
     serializer_class = CorrectionsSerializer
 
 
-class FaultViewSet(FilteredModelViewSet):
+class FaultViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = Fault.objects.all()
     serializer_class = FaultsSerializer
 
 
-class ServiceTargetViewSet(FilteredModelViewSet):
+class ServiceTargetViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = ServiceTarget.objects.all()
     serializer_class = ServiceTargetSerializer
 
 
-class NoteViewSet(FilteredModelViewSet):
+class NoteViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = Note.objects.all()
     serializer_class = NotesSerializer
 
@@ -274,17 +274,17 @@ class MaintenanceMonthTaskTemplateRelationView(APIView):
 """
 
 
-class TaskTemplateViewSet(FilteredModelViewSet):
+class TaskTemplateViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = TaskTemplate.objects.all()
     serializer_class = TaskTemplateSerializer
 
 
-class MaintenanceMonthViewSet(FilteredModelViewSet):
+class MaintenanceMonthViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = MaintenanceMonth.objects.all()
     serializer_class = MaintenanceMonthSerializer
 
 
-class YearMaintenanceTemplateViewSet(FilteredModelViewSet):
+class YearMaintenanceTemplateViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = YearMaintenanceTemplate.objects.all()
     serializer_class = YearMaintenanceTemplateSerializer
 
