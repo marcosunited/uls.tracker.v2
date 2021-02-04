@@ -124,7 +124,9 @@ class FilteredModelViewSet(viewsets.ModelViewSet):
                     kwargs.update({q.get('field') + op: q.get('value')})
                     query_set = query_set.filter(**kwargs)
             if order_by:
-                query_set.order_by(order_by)
+                for o in order_by:
+                    query_set = query_set.order_by(o)
+
         try:
             return query_set.filter(is_deleted=False)
         except FieldError:
