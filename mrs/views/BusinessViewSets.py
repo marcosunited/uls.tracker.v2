@@ -56,6 +56,20 @@ class RoundViewSet(FilteredModelViewSet):
     serializer_class = RoundsSerializer
 
 
+class RoundTechnicianOptionsView(APIView):
+    def get(self, request, pk_round):
+        try:
+            technician_all = Technician.objects.all()
+            round = Round.objects.get(id=pk_round)
+            technician_options = [technician for technician in technician_all if technician not in round.technicians.all()]
+            technician_serializer = TechniciansSerializer(technician_options, many=True)
+            return JsonResponse({'result': technician_serializer.data})
+        except Project.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The round does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 # /rounds/idRound/technicians/idTec/
 class RoundTechnicianRelationView(APIView):
     def post(self, request, pk_round, pk_technician):

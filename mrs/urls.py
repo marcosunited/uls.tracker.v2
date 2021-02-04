@@ -60,6 +60,9 @@ urlpatterns = [
     url(r'^api/v1/rounds/(?P<pk_round>[0-9]+)/technicians/(?P<pk_technician>[0-9]+)$',
         BusinessViewSets.RoundTechnicianRelationView.as_view()),
 
+    url(r'^api/v1/technicians/options/rounds/(?P<pk_round>[0-9]+)$',
+        BusinessViewSets.RoundTechnicianOptionsView.as_view()),
+
     # profiles - projects
     url(r'^api/v1/profiles/(?P<pk_profile>[0-9]+)/projects/(?P<pk_project>[0-9]+)$',
         BusinessViewSets.ProfileProjectRelationView.as_view()),
