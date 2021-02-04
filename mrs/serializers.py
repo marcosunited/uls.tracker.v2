@@ -329,7 +329,7 @@ class CountriesSerializer(serializers.ModelSerializer):
         fields = ('id',
                   'name',
                   'currency_code',
-                  'unlocode',)
+                  'un_code',)
 
 
 class ProfilesSerializer(serializers.ModelSerializer):

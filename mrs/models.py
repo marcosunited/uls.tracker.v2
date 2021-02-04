@@ -111,6 +111,7 @@ class ProcessTypeStatus(MrsModel):
     process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
 
+
     class Meta:
         managed = True
         db_table = 'process_types_status'
@@ -176,7 +177,7 @@ class Country(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=70)
     currency_code = models.CharField(max_length=3)
-    unlocale = models.CharField(max_length=2)
+    un_code = models.CharField(max_length=2)
 
     class Meta:
         managed = True
