@@ -56,6 +56,22 @@ class RoundViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     serializer_class = RoundsSerializer
 
 
+class WorkorderViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
+    queryset = Workorder.objects.all()
+    serializer_class = WorkordersSerializer
+
+    action_serializers = {
+        'retrieve': WorkordersSerializer,
+        'list': WorkordersListSerializer,
+        'create': WorkordersSerializer
+    }
+
+    def get_serializer_class(self):
+        if hasattr(self, 'action_serializers'):
+            return self.action_serializers.get(self.action, self.serializer_class)
+        return super(WorkorderViewSet, self).get_serializer_class()
+
+
 class RoundTechnicianOptionsView(APIView):
     def get(self, request, pk_round):
         try:
@@ -287,7 +303,6 @@ class MaintenanceMonthViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
 class YearMaintenanceTemplateViewSet(FilteredModelViewSet, LogicalDeleteModelViewSet):
     queryset = YearMaintenanceTemplate.objects.all()
     serializer_class = YearMaintenanceTemplateSerializer
-
 
 
 class GenerateMaintenancePlanView(APIView):

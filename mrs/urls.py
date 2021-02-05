@@ -36,6 +36,7 @@ router.register(r'jha_items', JhaItemViewSet)
 router.register(r'task_templates', TaskTemplateViewSet)
 router.register(r'maintenance_months', MaintenanceMonthViewSet)
 router.register(r'year_maintenance_template', YearMaintenanceTemplateViewSet)
+router.register(r'workorders', WorkorderViewSet)
 
 router.register(r'corrections', CorrectionViewSet)
 router.register(r'faults', FaultViewSet)

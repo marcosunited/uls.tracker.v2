@@ -513,10 +513,19 @@ class MaintenancePlansSerializer(serializers.ModelSerializer):
                   'name')
 
 
-class WorkordersSerializer(serializers.ModelSerializer):
+class WorkordersListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workorder
         fields = '__all__'
+
+
+class WorkordersSerializer(serializers.ModelSerializer):
+    technician = TechniciansSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Workorder
+        fields = '__all__'
+
 
 
 class NotesSerializer(serializers.ModelSerializer):

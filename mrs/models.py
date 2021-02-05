@@ -396,8 +396,8 @@ class JhaItem(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255, blank=True, null=True)
-    is_active = models.IntegerField(db_column='isActive')
-    is_ticked_default = models.IntegerField(db_column='isTickedDefault', blank=True, null=True)
+    is_active = models.BooleanField(db_column='isActive', default=True)
+    is_ticked_default = models.BooleanField(db_column='isTickedDefault', default=False)
 
     class Meta:
         managed = True
@@ -410,7 +410,7 @@ class JhaItem(MrsModel):
 class Round(MrsModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
-    is_active = models.BooleanField(db_column='isActive')
+    is_active = models.BooleanField(db_column='isActive', default=True)
     colour = models.CharField(max_length=30, blank=True, null=True)
     polygon = models.TextField(blank=True, null=True)
     technicians = models.ManyToManyField(Technician, blank=True)
@@ -506,7 +506,7 @@ class Lift(MrsModel):
     job = models.ForeignKey(Job, on_delete=models.DO_NOTHING, db_column='jobId')
     brand = models.ForeignKey(Brand, on_delete=models.DO_NOTHING, db_column='brandId')
     model = models.CharField(max_length=255, blank=True, null=True)
-    is_active = models.IntegerField(db_column='isActive')
+    is_active = models.BooleanField(db_column='isActive', default=True)
     floor = models.CharField(max_length=10, blank=True, null=True)
     drive = models.CharField(max_length=255, blank=True, null=True)
     has_light_trays = models.IntegerField(db_column='hasLightRays')
@@ -611,16 +611,16 @@ class Priority(MrsModel):
 
 class Workorder(MrsModel):
     id = models.AutoField(primary_key=True)
-    id_by_project = models.IntegerField(db_column='idByProject')
+    id_by_project = models.CharField(db_column='idByProject', max_length=20)
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
     # maintenance, callout, repair
     process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
     status = models.ForeignKey(ProcessTypeStatus, on_delete=models.DO_NOTHING, db_column='statusId')
     job = models.ForeignKey(Job, on_delete=models.DO_NOTHING, db_column='jobId')
-    lifts = models.ManyToManyField(Lift)
+    lifts = models.ManyToManyField(Lift, blank=True, null=True)
     docket_number = models.IntegerField(blank=True, null=True)
-    service_areas = models.ManyToManyField(ServiceArea)
-    service_types = models.ManyToManyField(ServiceType)
+    service_areas = models.ManyToManyField(ServiceArea, blank=True)
+    service_types = models.ManyToManyField(ServiceType, blank=True)
     service_target = models.ForeignKey(ServiceTarget, on_delete=models.DO_NOTHING, db_column='serviceTargetId')
     priority = models.ForeignKey(Priority, on_delete=models.DO_NOTHING, db_column='priorityId')
     technician = models.ForeignKey(Technician, on_delete=models.DO_NOTHING, db_column='technicianId')
@@ -635,8 +635,8 @@ class Workorder(MrsModel):
     detected_fault = models.IntegerField(db_column='detectedFaultId', blank=True, null=True)
     subject = models.CharField(max_length=255, blank=True, null=True)
     technician_description = models.TextField(max_length=32000, blank=True, null=True)
-    notes = models.ManyToManyField(Note)
-    correction = models.ForeignKey(Correction, models.DO_NOTHING, db_column='correctionId')
+    notes = models.ManyToManyField(Note, blank=True)
+    correction = models.ForeignKey(Correction, models.DO_NOTHING, db_column='correctionId', blank=True, null=True)
     solution = models.TextField(max_length=32000, blank=True, null=True)
     customer = models.ForeignKey(Customer, on_delete=models.DO_NOTHING)
     customer_signature = models.ImageField(blank=True, null=True)
@@ -645,13 +645,16 @@ class Workorder(MrsModel):
     solution_time = models.IntegerField(db_column='solutionTime', blank=True, null=True)
     expected_time = models.IntegerField(db_column='expectedTime', blank=True, null=True)
     is_chargeable = models.BooleanField(default='False', db_column='isChargeable')
-    parts_required = models.ManyToManyField(Part)
+    parts_required = models.ManyToManyField(Part,blank=True)
     is_closed = models.BooleanField(default=False, db_column='isClosed')
-    jha_items = models.ManyToManyField(JhaItem)
+    jha_items = models.ManyToManyField(JhaItem, blank=True)
 
     class Meta:
         managed = True
         db_table = 'workorders'
+
+    def __str__(self):
+        return self.id_by_project
 
 
 class MaintenancePlan(MrsModel):
