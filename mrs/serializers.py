@@ -527,7 +527,6 @@ class WorkordersSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
 class NotesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note

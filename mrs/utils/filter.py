@@ -1,17 +1,18 @@
 from django.apps import apps
 from django.core.exceptions import FieldError
-from django.db.models import Lookup, CharField, TextField
+from django.db.models import Lookup, CharField, TextField, Count
 from django.db.models.fields import Field
+from django.http import JsonResponse
 
 from rest_framework import serializers, viewsets
 from rest_framework.response import Response
 from rest_framework.routers import DefaultRouter, Route, DynamicRoute
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 from rest_framework.views import APIView
 
-from mrs.models import MrsField, MrsOperator
+from mrs.models import MrsField, MrsOperator, Project
 
-from mrs.utils.response import ResponseHttp as ObjectResponse
+from mrs.utils.response import ResponseHttp as ObjectResponse, ResponseHttp
 
 
 class Search(Lookup):
@@ -96,6 +97,22 @@ class ModelMetaView(APIView):
         response = ObjectResponse(self.fields)
         return Response(response.result, status=HTTP_200_OK)
 
+
+class ModelAggregationView(APIView):
+    def get(self, request, model, field):
+        try:
+            model = apps.get_model('mrs', model)
+            aggregations_result = model.objects.values(field).annotate(dcount=Count(field))
+            aggregations_list = list()
+            for aggregation in aggregations_result:
+                aggregation_item = {"key": aggregation[field], "items": 'null', "count": aggregation['dcount']}
+                aggregations_list.append(aggregation_item)
+
+            return JsonResponse({'result': aggregations_list})
+        except Project.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='The round does not exist').result, status=HTTP_404_NOT_FOUND)
+        except Exception as error:
+            return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
 class FilteredModelViewSet(viewsets.ModelViewSet):
     operators = {}

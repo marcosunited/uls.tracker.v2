@@ -9,7 +9,7 @@ from mrs.reports import ReportsViewSet
 from mrs.rules.RulesViewSet import RulesViewSet
 from mrs.rules.rules import RulesMetaView
 from mrs.utils.storage import FileView
-from mrs.utils.filter import QueryRouter, ModelMetaView
+from mrs.utils.filter import QueryRouter, ModelMetaView, ModelAggregationView
 from mrs.views import BusinessViewSets
 
 from mrs.views.BusinessViewSets import *
@@ -37,6 +37,8 @@ router.register(r'task_templates', TaskTemplateViewSet)
 router.register(r'maintenance_months', MaintenanceMonthViewSet)
 router.register(r'year_maintenance_template', YearMaintenanceTemplateViewSet)
 router.register(r'workorders', WorkorderViewSet)
+
+
 
 router.register(r'corrections', CorrectionViewSet)
 router.register(r'faults', FaultViewSet)
@@ -86,5 +88,10 @@ urlpatterns = [
     # maintenance
     url(r'^api/v1/maintenances/(?P<pk_lift>[0-9]+)/generate_plan$',
         BusinessViewSets.GenerateMaintenancePlanView.as_view()),
+
+
+    # aggregations
+    url(r'^api/v1/aggregate/(?P<model>\D+)/(?P<field>\D+)/', ModelAggregationView.as_view()),
+
 
 ]
