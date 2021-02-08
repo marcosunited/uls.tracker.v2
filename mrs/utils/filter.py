@@ -108,7 +108,7 @@ class ModelAggregationView(APIView):
                 aggregation_item = {"key": aggregation[field], "items": 'null', "count": aggregation['dcount']}
                 aggregations_list.append(aggregation_item)
 
-            return JsonResponse({'result': aggregations_list})
+            return JsonResponse({"data": aggregations_list}, safe=False)
         except Project.DoesNotExist:
             return JsonResponse(ResponseHttp(error='The round does not exist').result, status=HTTP_404_NOT_FOUND)
         except Exception as error:
