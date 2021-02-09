@@ -7,7 +7,4 @@ mrsauth/migrations/
 mrsauth/__pycache__/
 *.pyc
 *.iml
-manage.py
-./mrs/wsgi.py
-./mrs/settings/
 
