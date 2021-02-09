@@ -114,10 +114,10 @@ class ModelAggregationView(APIView):
             aggregations_result = model.objects.values(field).annotate(dcount=Count(field))
             aggregations_list = list()
             for aggregation in aggregations_result:
-                aggregation_item = {"key": aggregation[field], "items": 'null', "count": aggregation['dcount']}
+                aggregation_item = {"key": aggregation[field], "count": aggregation['dcount']}
                 aggregations_list.append(aggregation_item)
 
-            return JsonResponse({"data": aggregations_list}, safe=False)
+            return JsonResponse({"result": aggregations_list}, safe=False)
         except model.DoesNotExist:
             return JsonResponse(ResponseHttp(error='Model does not exist').result, status=HTTP_404_NOT_FOUND)
         except Exception as error:
