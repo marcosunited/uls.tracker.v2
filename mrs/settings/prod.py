@@ -89,7 +89,7 @@ WSGI_APPLICATION = 'mrs.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mrs',
+        'NAME': 'mrs.hotfixes.2',
         'USER': 'dev',
         'PASSWORD': 'DBPassULS$2020',
         'HOST': '10.42.0.246',
@@ -182,4 +182,4 @@ USE_TZ = True
 
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/var/www/html/uls.tracker.api/static/'
+STATIC_ROOT = '/var/www/html/uls.tracker.api.resources/static/'
