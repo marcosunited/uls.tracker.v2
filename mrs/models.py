@@ -111,7 +111,6 @@ class ProcessTypeStatus(MrsModel):
     process_type = models.ForeignKey(ProcessType, on_delete=models.DO_NOTHING, db_column='processTypeId')
     project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId')
 
-
     class Meta:
         managed = True
         db_table = 'process_types_status'
@@ -645,7 +644,7 @@ class Workorder(MrsModel):
     solution_time = models.IntegerField(db_column='solutionTime', blank=True, null=True)
     expected_time = models.IntegerField(db_column='expectedTime', blank=True, null=True)
     is_chargeable = models.BooleanField(default='False', db_column='isChargeable')
-    parts_required = models.ManyToManyField(Part,blank=True)
+    parts_required = models.ManyToManyField(Part, blank=True)
     is_closed = models.BooleanField(default=False, db_column='isClosed')
     jha_items = models.ManyToManyField(JhaItem, blank=True)
 

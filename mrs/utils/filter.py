@@ -1,6 +1,7 @@
+import re
 from django.apps import apps
 from django.core.exceptions import FieldError
-from django.db.models import Lookup, CharField, TextField, Count
+from django.db.models import Lookup, CharField, TextField, Count, Q
 from django.db.models.fields import Field
 from django.http import JsonResponse
 
@@ -14,6 +15,11 @@ from mrs.models import MrsField, MrsOperator, Project
 
 from mrs.utils.response import ResponseHttp as ObjectResponse, ResponseHttp
 
+
+def tokenize_text(text,
+                  findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
+                  normspace=re.compile(r'\s{2,}').sub):
+    return [normspace('', (t[0] or t[1]).strip()) for t in findterms(text)]
 
 class Search(Lookup):
     lookup_name = 'search'
@@ -67,6 +73,7 @@ class MrsFieldSerializer(serializers.ModelSerializer):
 
 class ModelMetaView(APIView):
     fields = []
+
     def get(self, request, model):
         model = apps.get_model('mrs', model)
         for _field in model._meta.fields:
@@ -95,12 +102,14 @@ class ModelMetaView(APIView):
                 pass
 
         response = ObjectResponse(self.fields)
+
         return Response(response.result, status=HTTP_200_OK)
 
 
 class ModelAggregationView(APIView):
     def get(self, request, model, field):
         try:
+            model = model[:-1]
             model = apps.get_model('mrs', model)
             aggregations_result = model.objects.values(field).annotate(dcount=Count(field))
             aggregations_list = list()
@@ -109,10 +118,11 @@ class ModelAggregationView(APIView):
                 aggregations_list.append(aggregation_item)
 
             return JsonResponse({"data": aggregations_list}, safe=False)
-        except Project.DoesNotExist:
-            return JsonResponse(ResponseHttp(error='The round does not exist').result, status=HTTP_404_NOT_FOUND)
+        except model.DoesNotExist:
+            return JsonResponse(ResponseHttp(error='Model does not exist').result, status=HTTP_404_NOT_FOUND)
         except Exception as error:
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class FilteredModelViewSet(viewsets.ModelViewSet):
     operators = {}
@@ -133,6 +143,10 @@ class FilteredModelViewSet(viewsets.ModelViewSet):
                 order_by = self.request.data["orderBy"]
             except KeyError:
                 order_by = None
+            try:
+                search = self.request.data["search"]
+            except KeyError:
+                search = None
 
             kwargs = {}
             for q in query_list:
@@ -140,6 +154,23 @@ class FilteredModelViewSet(viewsets.ModelViewSet):
                     op = FilteredModelViewSet.operators.get(q.get('operator'))
                     kwargs.update({q.get('field') + op: q.get('value')})
                     query_set = query_set.filter(**kwargs)
+            if search:
+                if search.get('fields') and search.get('text'):
+                    fields = search.get('fields')
+                    text = search.get('text')
+                    terms = tokenize_text(text)
+                    for term in terms:
+                        or_query = None
+                        for field_name in fields:
+                            q = Q(**{"%s__icontains" % field_name: term})
+                            if or_query is None:
+                                or_query = q
+                            else:
+                                or_query = or_query | q
+
+                            query_set = query_set.filter(or_query)
+                    pass
+                pass
             if order_by:
                 for o in order_by:
                     query_set = query_set.order_by(o)
