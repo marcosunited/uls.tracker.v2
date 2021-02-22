@@ -7,6 +7,6 @@ class JobVariables(BaseVariables):
 
     @numeric_rule_variable
     def lifts_count(self):
-        return self.job.lifts
+        return self.job.number
 
 

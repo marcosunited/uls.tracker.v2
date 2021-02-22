@@ -31,13 +31,20 @@ def getRules(content_type_id):
 
 def runModelRules(sender, instance, watched_fields):
     content_type = ContentType.objects.get(model=sender._meta.model_name)
-    history_entry = ActionsHistory.objects.filter(object_id=instance.id,
-                                                  content_type_id=content_type.id).latest('timestamp')
+    try:
+        history_entry = ActionsHistory.objects.filter(object_id=instance.id,
+                                          content_type_id=content_type.id).latest('timestamp')
+    except ActionsHistory.DoesNotExist:
+        history_entry = None
+
     evaluate_rules = False
-    for field in watched_fields:
-        if field in history_entry.model_state:
-            if getattr(instance, field) != history_entry.model_state.get(field):
-                evaluate_rules = True
+    if history_entry is not None:
+        for field in watched_fields:
+            if field in history_entry.model_state:
+                if getattr(instance, field) != history_entry.model_state.get(field):
+                    evaluate_rules = True
+    else:
+        evaluate_rules = True
 
     if evaluate_rules:
         _rules = Rule.objects.filter(content_type_id=content_type.id)
@@ -58,9 +65,12 @@ def runModelRules(sender, instance, watched_fields):
         serializer_class = getDynamicSerializer(sender)
         serializer = serializer_class(instance)
         json_instance = serializer.data
-
-        _hash = hash((str(rules), str(json_instance)))
-        action_history_entry = ActionsHistory.objects.filter(hash=_hash, executed=False)
+        ## use watched field to generate the hash
+        watched_fields_value = ''
+        for field_name in watched_fields:
+            watched_fields_value += str(field_name) + "=" + str(getattr(instance, field_name)) + ";"
+        _hash = hash(str(rules) + str(watched_fields_value))
+        action_history_entry = ActionsHistory.objects.filter(hash=_hash, executed=True)
 
         if not action_history_entry.exists():
             rule_triggered = run_all(rule_list=rules,

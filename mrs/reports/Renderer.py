@@ -1,12 +1,10 @@
-from datetime import timezone
 from io import BytesIO
 
-from django.core.files.base import ContentFile
 from django.template import Template, Context
 
 from xhtml2pdf import pisa
 
-from mrs.models import Report, ReportHistory
+from mrs.models import Report
 
 
 # TODO: set option to return pdf byte stream in the rest response and dont save
