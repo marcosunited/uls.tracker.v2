@@ -11,6 +11,7 @@ from mrs.models import Rule, ActionsHistory
 from mrs.serializers import getDynamicSerializer
 from mrs.utils.response import ResponseHttp as ObjectResponse
 
+
 post_update = Signal()
 
 
@@ -33,7 +34,7 @@ def runModelRules(sender, instance, watched_fields):
     content_type = ContentType.objects.get(model=sender._meta.model_name)
     try:
         history_entry = ActionsHistory.objects.filter(object_id=instance.id,
-                                          content_type_id=content_type.id).latest('timestamp')
+                                                      content_type_id=content_type.id).latest('timestamp')
     except ActionsHistory.DoesNotExist:
         history_entry = None
 
@@ -65,8 +66,8 @@ def runModelRules(sender, instance, watched_fields):
         serializer_class = getDynamicSerializer(sender)
         serializer = serializer_class(instance)
         json_instance = serializer.data
-        ## use watched field to generate the hash
         watched_fields_value = ''
+
         for field_name in watched_fields:
             watched_fields_value += str(field_name) + "=" + str(getattr(instance, field_name)) + ";"
         _hash = hash(str(rules) + str(watched_fields_value))
@@ -76,8 +77,7 @@ def runModelRules(sender, instance, watched_fields):
             rule_triggered = run_all(rule_list=rules,
                                      defined_variables=sender.RulesConf.variables(instance),
                                      defined_actions=sender.RulesConf.actions(instance),
-                                     stop_on_first_trigger=True
-                                     )
+                                     stop_on_first_trigger=True)
             if rule_triggered:
                 action_history = ActionsHistory(rule=rules,
                                                 variables=sender.RulesConf.variables.__name__,
@@ -95,15 +95,12 @@ def runRules(rule_id, variables, actions, data):
     run_all(rule_list=rule.conditions['rules'],
             defined_variables=variables(data),
             defined_actions=actions(data),
-            stop_on_first_trigger=True
-            )
+            stop_on_first_trigger=True)
 
 
 class RulesMetaView(APIView):
-
     def get(self, request, model):
         _model = apps.get_model('mrs', model)
-
         try:
             meta = export_rule_data(_model.RulesConf.variables,
                                     _model.RulesConf.actions)

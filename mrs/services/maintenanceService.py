@@ -9,7 +9,6 @@ class MaintenanceService:
         lift = Lift.objects.get(id=lift_id)
         job = lift.job
 
-
     def generate_plan(self, lift_id, name):
         lift = Lift.objects.get(id=lift_id)
         job = lift.job
@@ -27,6 +26,5 @@ class MaintenanceService:
         days_delta = timedelta(days=days_frequency)
         while planed_date <= end_date:
             planed_date = planed_date + days_delta
-
 
         return days_frequency

@@ -1,7 +1,6 @@
+from background_task import background
 from business_rules.actions import BaseActions, rule_action
 from business_rules.fields import FIELD_NUMERIC
-
-from mrs.tasks import test
 
 
 class JobActions(BaseActions):
@@ -11,4 +10,9 @@ class JobActions(BaseActions):
     @rule_action(params={"contract_addition": FIELD_NUMERIC})
     def update_contract(self, contract_addition):
         print('action executed, task scheduled')
-        test(creator=self.job)
+        self.test(creator=self.job)
+
+
+    #@background(schedule=2)
+    def test(self):
+        print("task executed")

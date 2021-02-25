@@ -870,6 +870,24 @@ class Rule(MrsModel):
         return self.name
 
 
+class ProgrammedTask(MrsModel):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=20)
+    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, db_column='contentTypeId', null=True)
+    description = models.TextField(blank=True, null=True)
+    filter = models.JSONField()
+    active = models.BooleanField(default=True)
+    conditions = models.JSONField()
+    project = models.ForeignKey(Project, on_delete=models.DO_NOTHING, db_column='projectId', blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'programmed_task'
+
+    def __str__(self):
+        return self.name
+
+
 class ActionsHistory(MrsModel):
     id = models.AutoField(primary_key=True)
     rule = models.JSONField()

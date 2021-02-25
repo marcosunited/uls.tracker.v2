@@ -4,7 +4,6 @@ from mrs.utils.model import to_dict
 
 
 def model_processor(report, model_pk):
-    data = {}
     try:
         model = ContentType.objects.get_for_id(report.content_type_id).model_class()
         instance = model.objects.get(id=model_pk)

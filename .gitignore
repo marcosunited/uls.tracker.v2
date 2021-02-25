@@ -1,10 +1,15 @@
 
 .idea/
 .gradle/
+manage.py
 mrs/__pycache__/
 mrs/mrs.iml
+mrs/wsgi.py
+mrs/asgi.py
 mrsauth/migrations/
 mrsauth/__pycache__/
 *.pyc
 *.iml
+
+
 

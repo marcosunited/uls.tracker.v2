@@ -1,4 +1,5 @@
 import re
+
 from django.apps import apps
 from django.core.exceptions import FieldError
 from django.db.models import Lookup, CharField, TextField, Count, Q
@@ -20,6 +21,7 @@ def tokenize_text(text,
                   findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
                   normspace=re.compile(r'\s{2,}').sub):
     return [normspace('', (t[0] or t[1]).strip()) for t in findterms(text)]
+
 
 class Search(Lookup):
     lookup_name = 'search'
@@ -124,61 +126,128 @@ class ModelAggregationView(APIView):
             return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class FilteredModelViewSet(viewsets.ModelViewSet):
+def get_q(entry):
+    complex_query = None
+    logical_operator = None
+    for w in entry:
+        if type(w) is list:
+            q_field = w[0]
+            q_operator = DynamicFilter.operators.get(w[1])
+            q_value = w[2]
+            if q_operator == 'between':
+                q_second_value = w[3]
+
+            _q = Q((q_field + q_operator, q_value))
+
+            if complex_query is None:
+                complex_query = _q
+
+            if logical_operator is not None:
+                if logical_operator == 'and':
+                    complex_query = complex_query & _q
+                else:
+                    complex_query = complex_query | _q
+        else:
+            logical_operator = w
+
+    return complex_query
+
+
+class DynamicFilter:
     operators = {}
 
-    def get_queryset(self):
-        if not FilteredModelViewSet.operators.keys():
-            operators_setting = MrsOperator.objects.all()
-            for operator in operators_setting:
-                FilteredModelViewSet.operators.update({operator.code: operator.django_lookup})
+    def filter(self, query_set, data):
+        query_list = None
+        search = None
+        order_by = None
 
-        query_set = super().get_queryset()
-        if self.request.method == 'POST':
+        if not DynamicFilter.operators.keys():
+            operators_setting = MrsOperator.objects.all()
+            for _operator in operators_setting:
+                DynamicFilter.operators.update({_operator.code: _operator.django_lookup})
+
+        if type(data) is list:
             try:
-                query_list = self.request.data["query"]
+                complex_query_list = data
             except KeyError:
                 return query_set
+        else:
             try:
-                order_by = self.request.data["orderBy"]
+                query_list = data["query"]
+            except KeyError:
+                query_list = None
+
+            try:
+                order_by = data["orderBy"]
             except KeyError:
                 order_by = None
+
             try:
-                search = self.request.data["search"]
+                search = data["search"]
             except KeyError:
                 search = None
 
-            kwargs = {}
-            for q in query_list:
-                if q.get('operator') and q.get('value'):
-                    op = FilteredModelViewSet.operators.get(q.get('operator'))
-                    kwargs.update({q.get('field') + op: q.get('value')})
-                    query_set = query_set.filter(**kwargs)
-            if search:
-                if search.get('fields') and search.get('text'):
-                    fields = search.get('fields')
-                    text = search.get('text')
-                    terms = tokenize_text(text)
-                    for term in terms:
-                        or_query = None
-                        for field_name in fields:
-                            q = Q(**{"%s__icontains" % field_name: term})
-                            if or_query is None:
-                                or_query = q
-                            else:
-                                or_query = or_query | q
+        complex_query = None
+        entry_count = 0
+        if complex_query_list:
+            for entry in complex_query_list:
+                if (entry_count + 1) == len(complex_query_list):
+                    break
+                if type(entry) is list:
+                    complex_query = get_q(entry)  ##esta sobre escribiendo con el ultimo item de la lista
+                else:
+                    if entry == "and":
+                        complex_query = complex_query & get_q(complex_query_list[entry_count + 1])
+                    else:
+                        complex_query = complex_query | get_q(complex_query_list[entry_count + 1])
 
-                            query_set = query_set.filter(or_query)
-                    pass
+                entry_count += 1
+            query_set = query_set.filter(complex_query)
+
+        kwargs = {}
+        if query_list:
+            try:
+                if entry.get('operator') and entry.get('value'):
+                    op = DynamicFilter.operators.get(entry.get('operator'))
+                    kwargs.update({entry.get('field') + op: entry.get('value')})
+                    query_set = query_set.filter(**kwargs)
+            except Exception:
                 pass
-            if order_by:
-                for o in order_by:
-                    query_set = query_set.order_by(o)
+
+        if search:
+            if search.get('fields') and search.get('text'):
+                fields = search.get('fields')
+                text = search.get('text')
+                terms = tokenize_text(text)
+                for term in terms:
+                    or_query = None
+                    for field_name in fields:
+                        entry = Q(**{"%s__icontains" % field_name: term})
+                        if or_query is None:
+                            or_query = entry
+                        else:
+                            or_query = or_query | entry
+
+                        query_set = query_set.filter(or_query)
+
+        if order_by:
+            for o in order_by:
+                query_set = query_set.order_by(o)
 
         try:
             return query_set.filter(is_deleted=False)
         except FieldError:
             return query_set
+
+
+class FilteredModelViewSet(viewsets.ModelViewSet):
+
+    def get_queryset(self):
+        query_set = super().get_queryset()
+        if self.request.method == 'POST':
+            dynamic_filter = DynamicFilter()
+            return dynamic_filter.filter(query_set, self.request.data)
+        return query_set
 
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
