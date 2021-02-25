@@ -160,6 +160,7 @@ class DynamicFilter:
         query_list = None
         search = None
         order_by = None
+        complex_query_list = None
 
         if not DynamicFilter.operators.keys():
             operators_setting = MrsOperator.objects.all()
