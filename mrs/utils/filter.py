@@ -174,9 +174,9 @@ class DynamicFilter:
                 return query_set
         else:
             try:
-                query_list = data["query"]
+                complex_query_list = data["query"]
             except KeyError:
-                query_list = None
+                complex_query_list = None
 
             try:
                 order_by = data["orderBy"]
