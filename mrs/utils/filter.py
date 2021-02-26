@@ -201,18 +201,21 @@ class DynamicFilter:
         complex_query = None
         entry_count = 0
         if complex_query_list:
-            for entry in complex_query_list:
-                if (entry_count + 1) == len(complex_query_list):
-                    break
-                if type(entry) is list:
-                    complex_query = get_q(entry)  ##esta sobre escribiendo con el ultimo item de la lista
-                else:
-                    if entry == "and":
-                        complex_query = complex_query & get_q(complex_query_list[entry_count + 1])
+            if type(complex_query_list[0]) is str:
+                complex_query = get_q(complex_query_list)
+            else:
+                for entry in complex_query_list:
+                    if (entry_count + 1) == len(complex_query_list):
+                        break
+                    if type(entry) is list:
+                        complex_query = get_q(entry)  ##esta sobre escribiendo con el ultimo item de la lista
                     else:
-                        complex_query = complex_query | get_q(complex_query_list[entry_count + 1])
+                        if entry == "and":
+                            complex_query = complex_query & get_q(complex_query_list[entry_count + 1])
+                        else:
+                            complex_query = complex_query | get_q(complex_query_list[entry_count + 1])
 
-                entry_count += 1
+                    entry_count += 1
             query_set = query_set.filter(complex_query)
 
         kwargs = {}
