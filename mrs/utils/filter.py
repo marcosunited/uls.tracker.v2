@@ -129,6 +129,16 @@ class ModelAggregationView(APIView):
 def get_q(entry):
     complex_query = None
     logical_operator = None
+
+    if type(entry[0]) is str:
+        q_field = entry[0]
+        q_operator = DynamicFilter.operators.get(entry[1])
+        q_value = entry[2]
+        if q_operator == 'between':
+            q_second_value = entry[3]
+        _q = Q((q_field + q_operator, q_value))
+        return _q
+
     for w in entry:
         if type(w) is list:
             q_field = w[0]
